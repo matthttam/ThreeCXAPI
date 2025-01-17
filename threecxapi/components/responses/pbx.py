@@ -1,6 +1,6 @@
-from components.response import Response
+from threecxapi.components.response import Response
 from pydantic import Field
-from components.schemas.pbx import (
+from threecxapi.components.schemas.pbx import (
     Receptionist,
     BlackListNumber,
     BlocklistAddr,

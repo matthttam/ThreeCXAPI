@@ -1,6 +1,6 @@
 import json
 from requests import HTTPError
-from components.schemas.ODataErrors import ErrorDetails, MainError, ODataError
+from threecxapi.components.schemas.ODataErrors import ErrorDetails, MainError, ODataError
 
 
 class APIError(Exception):

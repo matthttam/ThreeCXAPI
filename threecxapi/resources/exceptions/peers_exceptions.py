@@ -1,6 +1,6 @@
-from exceptions import APIError
+from threecxapi.exceptions import APIError
 from requests import HTTPError
-from components.schemas.pbx import Peer
+from threecxapi.components.schemas.pbx import Peer
 
 
 class PeerCreateError(APIError):

@@ -1,6 +1,6 @@
 from typing import Optional
 from typing import Any
-from components.schemas.pbx import Schema
+from threecxapi.components.schemas.pbx import Schema
 
 
 class ReferenceUpdate(Schema):

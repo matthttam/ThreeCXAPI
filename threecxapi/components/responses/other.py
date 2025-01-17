@@ -1,4 +1,4 @@
-from components.response import Response
+from threecxapi.components.response import Response
 
 
 class ODataCountResponse:

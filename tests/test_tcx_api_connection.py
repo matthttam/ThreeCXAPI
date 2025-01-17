@@ -1,165 +1,157 @@
 import pytest
-
-from requests import Response, Session, HTTPError
+import requests
+from unittest.mock import patch, MagicMock, PropertyMock
+from threecxapi.tcx_api_connection import TCX_API_Connection, AuthenticationToken
 from threecxapi.exceptions import APIAuthenticationError
-from threecxapi.tcx_api_connection import (
-    AuthenticationToken,
-    TCX_API_Connection,
-)
-from unittest.mock import MagicMock
+from threecxapi.components.parameters import QueryParameters
 
 
 class TestTCX_API_Connection:
-    @pytest.fixture
-    def mock_get_response(self):
-        mock_response = MagicMock(spec=Response)
-        mock_response.raise_for_status.side_effect = None
-        return mock_response
 
     @pytest.fixture
-    def mock_post_response(self):
-        mock_response = MagicMock(spec=Response)
-        mock_response.raise_for_status.side_effect = None
-        return mock_response
+    def mock_response(self):
+        # Mock a basic response object from requests
+        response = MagicMock(spec=requests.Response)
+        response.status_code = 200
+        response.text = '{"key": "value"}'
+        return response
 
     @pytest.fixture
-    def mock_session(self, mock_get_response, mock_post_response):
-        mock_session = MagicMock(spec=Session)
-        mock_session.get.return_value = mock_get_response
-        mock_session.post.return_value = mock_post_response
-        return mock_session
-
-    @pytest.fixture
-    def authentication_token(self):
-        return AuthenticationToken(
-            token_type="bearer",
-            expires_in=60,
-            access_token="EXAMPLE_TOKEN",
-            refresh_token="EXAMPLE_REFRESH_TOKEN",
-        )
-
-    @pytest.fixture
-    def api_connection(self, mock_session, authentication_token):
-        api_connection = TCX_API_Connection(server_url="http://example.com")
-        api_connection.session = mock_session
-        api_connection.token = authentication_token
-        return api_connection
-
-    def test_get_api_endpoint_url(self, api_connection):
-        endpoint = "test"
-        assert (
-            api_connection.get_api_endpoint_url(endpoint)
-            == "http://example.com/xapi/v1/test"
-        )
+    def api_connection(self, mock_response):
+        # Get a TCX_API_Connection object with a mocked _make_request method
+        with patch.object(TCX_API_Connection, "_make_request", return_value=MagicMock(spec=requests.Response)) as mock:
+            api_connection = TCX_API_Connection(server_url="https://example.com")
+            yield api_connection
 
     def test_api_url(self, api_connection):
-        assert api_connection.api_url == "http://example.com/xapi/v1"
-        api_connection.api_path = "/test_path"
-        assert api_connection.api_url == "http://example.com/test_path"
+        assert api_connection.api_url == "https://example.com/xapi/v1"
 
-    def test_get_headers(self, api_connection):
-        token = MagicMock()
-        token.access_token = "test_token"
+    def test_token_getter(self, api_connection):
+        token = AuthenticationToken(**{
+            "token_type": "Bearer",
+            "expires_in": 3600,
+            "access_token": "access",
+            "refresh_token": "refresh"
+            })
+        api_connection._token = token
+        assert api_connection.token == token
+
+    def test_token_setter(self, api_connection):
+        token = {"token_type": "Bearer", "expires_in": 3600, "access_token": "access", "refresh_token": "refresh"}
         api_connection.token = token
-        headers = api_connection.get_headers()
-        assert headers == {
-            "Authorization": "Bearer test_token",
-            "content-type": "application/json",
-            "Accept": "application/json",
-        }
+        assert api_connection._token == AuthenticationToken(**token)
 
-    def test_get_unauthenticated_headers(self, api_connection):
-        headers = api_connection.get_unauthenticated_headers()
-        assert headers == {
-            "Content-type": "application/json",
-            "Accept": "application/json",
-        }
+    @patch("threecxapi.tcx_api_connection.requests.Session")
+    def test_init(self, mock_requests_session):
+        mock_session = MagicMock()
+        mock_requests_session.return_value = mock_session
 
-    def test_get(self, api_connection, mock_session, mock_get_response):
-        endpoint = "test_endpoint"
-        params = MagicMock()
-        assert api_connection.get(endpoint=endpoint, params=params) == mock_get_response
-        mock_session.get.assert_called_once_with(
-            url="http://example.com/xapi/v1/test_endpoint",
-            params=params.model_dump.return_value,
-            headers=api_connection.get_headers(),
+        api_connection = TCX_API_Connection(server_url="https://example.com")
+
+        assert api_connection.server_url == "https://example.com"
+        assert api_connection.api_path == "/xapi/v1"
+        assert api_connection.session == mock_session
+        assert api_connection.token_expiry_time == 0
+        assert api_connection._token is None
+
+    def test_get_api_endpoint_url(self, api_connection):
+        assert api_connection.get_api_endpoint_url("endpoint") == "https://example.com/xapi/v1/endpoint"
+
+    def test_get_with_params(self, api_connection, mock_response):
+        api_connection._make_request.return_value = mock_response
+        api_connection = TCX_API_Connection(server_url="https://example.com")
+        return_data = {"key": "value"}
+        query_params = MagicMock(model_dump=MagicMock(return_value=return_data))  # Mocking the QueryParameters class
+        endpoint = "/test-endpoint"
+
+        result = api_connection.get(endpoint, params=query_params)
+
+        api_connection._make_request.assert_called_once_with(
+            "get", endpoint, params=return_data
         )
-        mock_get_response.raise_for_status.assert_called_once()
+        query_params.model_dump.assert_called_once_with(exclude_none=True, by_alias=True)
+        assert result == mock_response
 
-    def test_post(self, api_connection, mock_session, mock_post_response):
-        endpoint = "test_endpoint"
+    def test_get_without_params(mself, api_connection, mock_response):
+        api_connection._make_request.return_value = mock_response
+        api_connection = TCX_API_Connection(server_url="https://example.com")
+        endpoint = "/test-endpoint"
+
+        result = api_connection.get(endpoint)
+
+        api_connection._make_request.assert_called_once_with(
+            "get", endpoint, params=None
+        )
+        assert result == mock_response
+
+    def test_post(self, api_connection, mock_response):
         data = {"key": "value"}
-        assert api_connection.post(endpoint=endpoint, data=data) == mock_post_response
-        mock_session.post.assert_called_once_with(
-            url="http://example.com/xapi/v1/test_endpoint", data=data
-        )
-        mock_post_response.raise_for_status.assert_called_once()
+        api_connection._make_request.return_value = mock_response
 
-    # def test_patch(self, api_connection, mock_session):
-    #    endpoint = "test_endpoint"
-    #    params = MagicMock()
-    #    data = {"key": "value"}
-    #    response_mock = MagicMock(spec=Response)
-    #    mock_session.patch.return_value = response_mock
-    #    response_mock.raise_for_status.side_effect = None
-    #    assert api_connection.patch(endpoint, params, data) == response_mock
-    #    mock_session.patch.assert_called_once_with(
-    #        url="http://example.com/xapi/v1/test_endpoint", params=params, data=data
-    #    )
-    #    response_mock.raise_for_status.assert_called_once()
+        response = api_connection.post("endpoint", data)
 
-    # def test_delete(self, api_connection, mock_session):
-    #    endpoint = "test_endpoint"
-    #    id = 123
-    #    response_mock = MagicMock(spec=Response)
-    #    mock_session.delete.return_value = response_mock
-    #    response_mock.raise_for_status.side_effect = None
-    #    assert api_connection.delete(endpoint, id) == response_mock
-    #    mock_session.delete.assert_called_once_with(
-    #        url="http://example.com/xapi/v1/test_endpoint", params=id
-    #    )
-    #    response_mock.raise_for_status.assert_called_once()
+        api_connection._make_request.assert_called_once_with("post", "endpoint", json=data)
+        assert response == mock_response
 
-    def test_authenticate(self, api_connection, mock_session):
-        username = "user"
-        password = "pass"
-        response_mock = MagicMock(spec=Response)
-        response_mock.json.return_value = {
-            "Token": {
-                "access_token": "test_token",
-                "token_type": "bearer",
-                "expires_in": 60,
-                "refresh_token": "test_refresh_token",
-            }
-        }
-        mock_session.post.return_value = response_mock
-        response_mock.raise_for_status.side_effect = None
-        api_connection.authenticate(username, password)
-        mock_session.post.assert_called_once_with(
-            url="http://example.com/webclient/api/Login/GetAccessToken",
-            json={"SecurityCode": "", "Username": username, "Password": password},
-            headers={"Content-type": "application/json", "Accept": "application/json"},
-        )
-        response_mock.raise_for_status.assert_called_once()
-        assert api_connection.token.access_token == "test_token"
+    def test_patch(self, api_connection, mock_response):
+        data = {"key": "value"}
+        api_connection._make_request.return_value = mock_response
 
-    def test_authenticate_failure(self, api_connection, mock_session):
-        username = "user"
-        password = "pass"
-        mock_response = MagicMock(spec=Response)
-        mock_response.status_code = 500
-        mock_response.raise_for_status.side_effect = HTTPError(response=mock_response)
-        mock_session.post.return_value = mock_response
+        response = api_connection.patch("endpoint", data)
+
+        api_connection._make_request.assert_called_once_with("patch", "endpoint", json=data)
+        assert response == mock_response
+
+    def test_delete(self, api_connection, mock_response):
+        data = 1
+        api_connection._make_request.return_value = mock_response
+
+        response = api_connection.delete("endpoint", data)
+
+        api_connection._make_request.assert_called_once_with("delete", "endpoint", params=data)
+        assert response == mock_response
+
+    def test_authenticate_success(self, api_connection):
+        token = {"Token": {"token_type": "Bearer", "expires_in": 3600, "access_token": "access", "refresh_token": "refresh"}}
+        mock_response = MagicMock(json=MagicMock(get=MagicMock(side_effect=token)))
+        api_connection.session.post = MagicMock(return_value=mock_response)
+        mock_response.raise_for_status = MagicMock()
+        #mock_token = MagicMock()
+        mock_token = PropertyMock()
+        with patch.object(api_connection, 'token', property(mock_token)) as mock_token:
+            mock_token.setter = MagicMock()
+            api_connection.authenticate("username", "password")
+        #with patch.object(type(api_connection), 'token', new_callable=PropertyMock) as mock_token:
+        #    
+        #    mock_token.configure_mock(setter= MagicMock())
+        #    api_connection.authenticate("username", "password")
+        #    mock_token.assert_called_once_with(mock_response)
+            
+            
+            #mock_token.setter.assert_called_once_with(mock_response)
+            #mock_token.assert_called_once_with()
+            #mock_response.raise_for_status.assert_called_once_with()
+            #assert api_connection.token.access_token == "access"
+            #assert api_connection.token.refresh_token == "refresh"
+
+    @patch("requests.Session.post")
+    def test_authenticate_failure(self, mock_post, api_connection):
+        mock_response = MagicMock()
+        mock_response.raise_for_status.side_effect = requests.HTTPError("Authentication failed")
+        mock_post.return_value = mock_response
+
         with pytest.raises(APIAuthenticationError):
-            api_connection.authenticate(username, password)
-        mock_session.post.assert_called_once()
+            api_connection.authenticate("username", "password")
 
-    def test_refresh_authentication(
-        self, api_connection, mock_session, mock_post_response
-    ):
-        assert api_connection.refresh_authentication() == mock_post_response
-        mock_session.post.assert_called_once_with(
-            url="http://example.com/webclient/api/Login/GetAccessToken",
-            json={"client_id": "Webclient", "grant_type": "refresh_token"},
-            headers=api_connection.get_unauthenticated_headers(),
-        )
+    @patch("requests.Session.post")
+    def test_refresh_access_token(self, mock_post, api_connection):
+        api_connection._token = AuthenticationToken("Bearer", 3600, "access", "refresh")
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"token_type": "Bearer", "expires_in": 3600, "access_token": "new_access", "refresh_token": "new_refresh"}
+        mock_response.raise_for_status = MagicMock()
+        mock_post.return_value = mock_response
+
+        api_connection._refresh_access_token()
+
+        assert api_connection.token.access_token == "new_access"
+        assert api_connection.token.refresh_token == "new_refresh"

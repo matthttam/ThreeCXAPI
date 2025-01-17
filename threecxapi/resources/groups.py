@@ -2,10 +2,10 @@ from pydantic import TypeAdapter
 import requests
 from typing import List
 from enum import auto
-from resources.api_resource import APIResource
-from util import create_enum_from_model
-from components.schemas.pbx import Group
-from components.parameters import (
+from threecxapi.resources.api_resource import APIResource
+from threecxapi.util import create_enum_from_model
+from threecxapi.components.schemas.pbx import Group
+from threecxapi.components.parameters import (
     ExpandParameters,
     ListParameters,
     OrderbyParameters,

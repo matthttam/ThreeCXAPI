@@ -3,9 +3,9 @@ import time
 
 from typing import NamedTuple, Optional
 
-from exceptions import APIAuthenticationError
-from api import API
-from components.parameters import QueryParameters
+from threecxapi.api import API
+from threecxapi.exceptions import APIAuthenticationError
+from threecxapi.components.parameters import QueryParameters
 
 
 class AuthenticationToken(NamedTuple):
@@ -30,6 +30,10 @@ class TCX_API_Connection(API):
     def token(self, token):
         self._token = AuthenticationToken(**token)
         self._update_token_expiry_time(self.token.expires_in)
+
+    @token.deleter
+    def token(self):
+        self._token = None
 
     def __init__(self, *args, server_url, api_path="/xapi/v1", **kwargs):
         self.server_url = server_url

@@ -4,18 +4,19 @@ from pydantic import TypeAdapter
 import requests
 
 from typing import List
-from resources.api_resource import APIResource
-from util import create_enum_from_model
+from threecxapi.resources.api_resource import APIResource
+from threecxapi.util import create_enum_from_model
 
-from components.responses.other import HasDuplicatedEmailResponse
-from components.schemas.pbx import User
-from components.parameters import (
+
+from threecxapi.components.responses.other import HasDuplicatedEmailResponse
+from threecxapi.components.schemas.pbx import User
+from threecxapi.components.parameters import (
     ExpandParameters,
     ListParameters,
     OrderbyParameters,
     SelectParameters,
 )
-from resources.exceptions.users_exceptions import (
+from threecxapi.resources.exceptions.users_exceptions import (
     UserCreateError,
     UserListError,
     UserGetError,
