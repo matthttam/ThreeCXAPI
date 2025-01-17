@@ -1,5 +1,5 @@
 from abc import ABC
-from components.parameters import ListParameters
+from threecxapi.components.parameters import ListParameters
 
 
 class TestParameters:

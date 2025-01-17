@@ -1,6 +1,7 @@
 import pytest
-from util import TcxStrEnum, TcxStrEnumMeta
 from enum import auto, StrEnum
+
+from threecxapi.util import TcxStrEnum, TcxStrEnumMeta
 
 
 class TestTcxStrEnum:
