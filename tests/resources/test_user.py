@@ -2,13 +2,13 @@ import requests
 from unittest.mock import MagicMock
 import pytest
 from pydantic import ValidationError
-from tcx_api.resources.users import ListUserParameters, UserProperties
-from tcx_api.components.parameters import ListParameters
-from tcx_api.resources.users import UsersResource
-from tcx_api.tcx_api_connection import TCX_API_Connection
-from tcx_api.components.schemas.pbx import User
-from tcx_api import exceptions as TCX_Exceptions
-
+from resources.users import ListUserParameters, UserProperties
+from components.parameters import ListParameters
+from resources.users import UsersResource
+from tcx_api_connection import TCX_API_Connection
+from components.schemas.pbx import User
+# from tcx_api import exceptions as TCX_Exceptions
+import exceptions as TCX_Exceptions
 
 class TestListUserParameters:
 

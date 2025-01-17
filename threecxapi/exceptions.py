@@ -1,6 +1,6 @@
 import json
 from requests import HTTPError
-from tcx_api.components.schemas.ODataErrors import ErrorDetails, MainError, ODataError
+from components.schemas.ODataErrors import ErrorDetails, MainError, ODataError
 
 
 class APIError(Exception):

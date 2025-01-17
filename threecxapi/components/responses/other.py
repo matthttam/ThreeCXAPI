@@ -1,4 +1,4 @@
-from tcx_api.components.response import Response
+from components.response import Response
 
 
 class ODataCountResponse:

@@ -4,18 +4,18 @@ from pydantic import TypeAdapter
 import requests
 
 from typing import List
-from tcx_api.resources.api_resource import APIResource
-from tcx_api.util import create_enum_from_model
+from resources.api_resource import APIResource
+from util import create_enum_from_model
 
-from tcx_api.components.responses.other import HasDuplicatedEmailResponse
-from tcx_api.components.schemas.pbx import User
-from tcx_api.components.parameters import (
+from components.responses.other import HasDuplicatedEmailResponse
+from components.schemas.pbx import User
+from components.parameters import (
     ExpandParameters,
     ListParameters,
     OrderbyParameters,
     SelectParameters,
 )
-from tcx_api.resources.exceptions.users_exceptions import (
+from resources.exceptions.users_exceptions import (
     UserCreateError,
     UserListError,
     UserGetError,

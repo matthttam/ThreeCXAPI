@@ -1,8 +1,8 @@
 import pytest
 
 from requests import Response, Session, HTTPError
-from tcx_api.exceptions import APIAuthenticationError
-from tcx_api.tcx_api_connection import (
+from exceptions import APIAuthenticationError
+from tcx_api_connection import (
     AuthenticationToken,
     TCX_API_Connection,
 )

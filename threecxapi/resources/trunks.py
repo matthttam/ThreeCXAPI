@@ -1,16 +1,16 @@
 import requests
 from pydantic import TypeAdapter
 from typing import List
-from tcx_api.resources.api_resource import APIResource
-from tcx_api.util import create_enum_from_model
-from tcx_api.components.schemas.pbx import Trunk, XTelegramAuth
-from tcx_api.components.parameters import (
+from resources.api_resource import APIResource
+from util import create_enum_from_model
+from components.schemas.pbx import Trunk, XTelegramAuth
+from components.parameters import (
     ExpandParameters,
     ListParameters,
     OrderbyParameters,
     SelectParameters,
 )
-from tcx_api.resources.exceptions.trunks_exceptions import (
+from resources.exceptions.trunks_exceptions import (
     TrunkCreateError,
     TrunkListError,
     TrunkGetError,

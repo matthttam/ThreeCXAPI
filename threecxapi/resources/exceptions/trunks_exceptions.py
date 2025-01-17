@@ -1,6 +1,6 @@
-from tcx_api.exceptions import APIError
+from exceptions import APIError
 from requests import HTTPError
-from tcx_api.components.schemas.pbx import Trunk
+from components.schemas.pbx import Trunk
 
 
 class TrunkCreateError(APIError):

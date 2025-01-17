@@ -1,6 +1,6 @@
-from tcx_api.components.response import Response
+from components.response import Response
 from pydantic import Field
-from tcx_api.components.schemas.pbx import (
+from components.schemas.pbx import (
     Receptionist,
     BlackListNumber,
     BlocklistAddr,

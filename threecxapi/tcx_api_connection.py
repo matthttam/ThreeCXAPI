@@ -3,9 +3,9 @@ import time
 
 from typing import NamedTuple, Optional
 
-from tcx_api.exceptions import APIAuthenticationError
-from tcx_api.api import API
-from tcx_api.components.parameters import QueryParameters
+from exceptions import APIAuthenticationError
+from api import API
+from components.parameters import QueryParameters
 
 
 class AuthenticationToken(NamedTuple):

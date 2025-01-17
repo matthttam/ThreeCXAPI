@@ -1,6 +1,6 @@
-from tcx_api.exceptions import APIError
+from exceptions import APIError
 from requests import HTTPError
-from tcx_api.components.schemas.pbx import User
+from components.schemas.pbx import User
 
 
 class UserCreateError(APIError):

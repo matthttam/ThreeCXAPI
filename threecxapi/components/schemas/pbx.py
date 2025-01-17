@@ -3,8 +3,8 @@ from uuid import UUID
 from datetime import datetime
 from typing import Optional
 from pydantic import Field
-from tcx_api.components.schema import Schema
-from tcx_api.components.schemas.enums import (
+from components.schema import Schema
+from components.schemas.enums import (
     AddedBy,
     AnimationStyle,
     Authentication, AuthenticationType,

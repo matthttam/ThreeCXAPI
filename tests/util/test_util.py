@@ -1,5 +1,5 @@
 import pytest
-from tcx_api.util import TcxStrEnum, TcxStrEnumMeta
+from util import TcxStrEnum, TcxStrEnumMeta
 from enum import auto, StrEnum
 
 

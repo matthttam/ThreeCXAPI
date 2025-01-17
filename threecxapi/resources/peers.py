@@ -3,16 +3,16 @@ from typing import List
 
 from pydantic import TypeAdapter
 
-from tcx_api.components.parameters import (
+from components.parameters import (
     ExpandParameters,
     ListParameters,
     OrderbyParameters,
     SelectParameters,
 )
-from tcx_api.resources.api_resource import APIResource
-from tcx_api.components.schemas.pbx import Peer
-from tcx_api.resources.exceptions.peers_exceptions import PeerListError, PeerGetError
-from tcx_api.util import create_enum_from_model
+from resources.api_resource import APIResource
+from components.schemas.pbx import Peer
+from resources.exceptions.peers_exceptions import PeerListError, PeerGetError
+from util import create_enum_from_model
 
 
 PeerProperties = create_enum_from_model(Peer)

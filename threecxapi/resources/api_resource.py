@@ -1,5 +1,5 @@
 from abc import ABC
-from tcx_api.tcx_api_connection import TCX_API_Connection
+from tcx_api_connection import TCX_API_Connection
 from pydantic import BaseModel, ConfigDict
 
 
