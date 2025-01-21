@@ -113,8 +113,10 @@ class TCX_API_Connection(API):
             )
             response.raise_for_status()
         except requests.HTTPError as e:
-            raise APIAuthenticationError(e)
-        self.token = response.json().get("Token", {})
+            raise APIAuthenticationError(e.response.status_code, str(e))
+        json_response = response.json()
+        token = json_response.get("Token", {})
+        self.token = token
 
     def _refresh_access_token(self):
         # Get Access Token
@@ -130,7 +132,7 @@ class TCX_API_Connection(API):
             )
             response.raise_for_status()
         except requests.HTTPError as e:
-            raise APIAuthenticationError(e)
+            raise APIAuthenticationError(e.response.status_code, str(e))
         self.token = response.json()
 
     def _is_token_expired(self, buffer: Optional[int] = 5) -> bool:

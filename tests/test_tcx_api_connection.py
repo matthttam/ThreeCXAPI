@@ -4,6 +4,7 @@ from unittest.mock import patch, MagicMock, PropertyMock
 from threecxapi.tcx_api_connection import TCX_API_Connection, AuthenticationToken
 from threecxapi.exceptions import APIAuthenticationError
 from threecxapi.components.parameters import QueryParameters
+from threecxapi.exceptions import APIAuthenticationError
 
 
 class TestTCX_API_Connection:
@@ -19,7 +20,7 @@ class TestTCX_API_Connection:
     @pytest.fixture
     def api_connection(self, mock_response):
         # Get a TCX_API_Connection object with a mocked _make_request method
-        with patch.object(TCX_API_Connection, "_make_request", return_value=MagicMock(spec=requests.Response)) as mock:
+        with patch.object(TCX_API_Connection, "_make_request", return_value=MagicMock(spec=requests.Response)):
             api_connection = TCX_API_Connection(server_url="https://example.com")
             yield api_connection
 
@@ -111,37 +112,37 @@ class TestTCX_API_Connection:
         api_connection._make_request.assert_called_once_with("delete", "endpoint", params=data)
         assert response == mock_response
 
-    def test_authenticate_success(self, api_connection):
-        token = {"Token": {"token_type": "Bearer", "expires_in": 3600, "access_token": "access", "refresh_token": "refresh"}}
-        mock_response = MagicMock(json=MagicMock(get=MagicMock(side_effect=token)))
-        api_connection.session.post = MagicMock(return_value=mock_response)
-        mock_response.raise_for_status = MagicMock()
-        #mock_token = MagicMock()
-        mock_token = PropertyMock()
-        with patch.object(api_connection, 'token', property(mock_token)) as mock_token:
-            mock_token.setter = MagicMock()
+    @patch('threecxapi.tcx_api_connection.requests.Session')
+    def test_authenticate_success(self, mock_session_class):
+        # Patch token again in the test to track setter calls
+        with patch.object(TCX_API_Connection, 'token', new_callable=PropertyMock) as mock_token:
+            token = {"Token": {"token_type": "Bearer", "expires_in": 3600, "access_token": "access", "refresh_token": "refresh"}}
+            mock_response = MagicMock()
+            mock_response.json.return_value = token
+            api_connection = TCX_API_Connection(server_url="https://example.com")
+            api_connection.session.post.return_value = mock_response
+
+            # Call the method that sets self.token
             api_connection.authenticate("username", "password")
-        #with patch.object(type(api_connection), 'token', new_callable=PropertyMock) as mock_token:
-        #    
-        #    mock_token.configure_mock(setter= MagicMock())
-        #    api_connection.authenticate("username", "password")
-        #    mock_token.assert_called_once_with(mock_response)
-            
-            
-            #mock_token.setter.assert_called_once_with(mock_response)
-            #mock_token.assert_called_once_with()
-            #mock_response.raise_for_status.assert_called_once_with()
-            #assert api_connection.token.access_token == "access"
-            #assert api_connection.token.refresh_token == "refresh"
+
+            # Assert the setter was called with the correct token value
+            mock_token.mock_calls
+            mock_token.assert_called_with(token["Token"])
 
     @patch("requests.Session.post")
     def test_authenticate_failure(self, mock_post, api_connection):
-        mock_response = MagicMock()
-        mock_response.raise_for_status.side_effect = requests.HTTPError("Authentication failed")
-        mock_post.return_value = mock_response
+        with pytest.raises(APIAuthenticationError) as e:
+            mock_response = MagicMock(spec=requests.models.Response)
+            mock_response.status_code = 418
+            mock_response.raise_for_status.side_effect = requests.HTTPError(response=mock_response)
+            api_connection = TCX_API_Connection(server_url="https://example.com")
+            api_connection.session.post.return_value = mock_response
 
-        with pytest.raises(APIAuthenticationError):
+            # Call the method that sets self.token
             api_connection.authenticate("username", "password")
+        assert e.value.status_code == 418
+        assert str(e) == "blah" # Not done yet
+
 
     @patch("requests.Session.post")
     def test_refresh_access_token(self, mock_post, api_connection):

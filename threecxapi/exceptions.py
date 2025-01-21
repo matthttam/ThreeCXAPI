@@ -55,9 +55,12 @@ class APIAuthenticationError(Exception):
         HTTP Response Code
     """
 
-    def __init__(self, http_error: HTTPError):
-        self.status_code = http_error.response.status_code
-        self.error_message = str(http_error)
+    # def __init__(self, http_error: HTTPError):
+    #     self.status_code = http_error.response.status_code
+    #     self.error_message = str(http_error)
+    def __init__(self, status_code: int, error_message: str):
+        self.status_code = status_code
+        self.error_message = error_message
 
     def __str__(self):
         return f"Authentication Failure. {self.error_message} ({self.status_code})"
