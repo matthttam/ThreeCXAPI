@@ -4,7 +4,7 @@ import time
 from typing import NamedTuple, Optional
 
 from threecxapi.api import API
-from threecxapi.exceptions import APIAuthenticationError
+from threecxapi.exceptions import APIAuthenticationError, APIAuthenticationTokenRefreshError
 from threecxapi.components.parameters import QueryParameters
 
 
@@ -18,6 +18,13 @@ class AuthenticationToken(NamedTuple):
 class TCX_API_Connection(API):
     default_headers = {"Content-type": "application/json", "Accept": "application/json"}
 
+    def __init__(self, *args, server_url, api_path="/xapi/v1", **kwargs):
+        self.server_url = server_url
+        self.api_path = api_path
+        self.session = requests.Session()
+        self.token_expiry_time = 0
+        self._token = None
+
     @property
     def api_url(self):
         return self.server_url + self.api_path
@@ -30,17 +37,6 @@ class TCX_API_Connection(API):
     def token(self, token):
         self._token = AuthenticationToken(**token)
         self._update_token_expiry_time(self.token.expires_in)
-
-    @token.deleter
-    def token(self):
-        self._token = None
-
-    def __init__(self, *args, server_url, api_path="/xapi/v1", **kwargs):
-        self.server_url = server_url
-        self.api_path = api_path
-        self.session = requests.Session()
-        self.token_expiry_time = 0
-        self._token = None
 
     def get_api_endpoint_url(self, endpoint):
         return self.api_url + "/" + endpoint
@@ -113,12 +109,12 @@ class TCX_API_Connection(API):
             )
             response.raise_for_status()
         except requests.HTTPError as e:
-            raise APIAuthenticationError(e.response.status_code, str(e))
+            raise APIAuthenticationError(e)
         json_response = response.json()
         token = json_response.get("Token", {})
         self.token = token
 
-    def _refresh_access_token(self):
+    def _refresh_access_token(self) -> None:
         # Get Access Token
         data = {
             "client_id": "Webclient",
@@ -132,7 +128,7 @@ class TCX_API_Connection(API):
             )
             response.raise_for_status()
         except requests.HTTPError as e:
-            raise APIAuthenticationError(e.response.status_code, str(e))
+            raise APIAuthenticationTokenRefreshError(original_exception=e)
         self.token = response.json()
 
     def _is_token_expired(self, buffer: Optional[int] = 5) -> bool:

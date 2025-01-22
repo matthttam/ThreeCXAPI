@@ -1,7 +1,5 @@
-import random
 from unittest.mock import MagicMock
 
-from faker import Faker
 import requests
 import pytest
 from pydantic import ValidationError
@@ -13,7 +11,6 @@ from threecxapi.tcx_api_connection import TCX_API_Connection
 from threecxapi.components.schemas.pbx import User
 import threecxapi.exceptions as TCX_Exceptions
 
-fake = Faker()
 
 class TestListUserParameters:
 

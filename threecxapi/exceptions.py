@@ -48,19 +48,33 @@ class APIError(Exception):
 
 
 class APIAuthenticationError(Exception):
-    """Exception raised when authentication fails
+    """Exception raised for authentication failures.
 
     Attributes:
-        HTTP Response Error Message
-        HTTP Response Code
+        original_exception (HTTPError): The original HTTPError instance.
+        status_code (int): The HTTP response status code.
+        error_message (str): The error message from the original exception.
     """
+    def __init__(self, original_exception: HTTPError):
+        self.original_exception = original_exception
 
-    # def __init__(self, http_error: HTTPError):
-    #     self.status_code = http_error.response.status_code
-    #     self.error_message = str(http_error)
-    def __init__(self, status_code: int, error_message: str):
-        self.status_code = status_code
-        self.error_message = error_message
+    @property
+    def status_code(self):
+        try:
+            return self.original_exception.response.status_code
+        except AttributeError:
+            return None
+
+    @property
+    def error_message(self):
+        return str(self.original_exception)
 
     def __str__(self):
-        return f"Authentication Failure. {self.error_message} ({self.status_code})"
+        return f"Authentication Failure. ({self.status_code}) {self.error_message}"
+
+
+class APIAuthenticationTokenRefreshError(APIAuthenticationError):
+    # def __init__(self, original_exception: HTTPError):
+    #     super().__init__(self, original_exception=original_exception)
+    def __str__(self):
+        return f"Failed to refresh authentication token. ({self.status_code}) {self.error_message}"
