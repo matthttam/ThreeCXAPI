@@ -1,12 +1,12 @@
 from abc import ABC
 from pydantic import BaseModel, ConfigDict
-from threecxapi.tcx_api_connection import TCX_API_Connection
+from threecxapi.tcx_api_connection import ThreeCXApiConnection
 
 
 class APIResource(BaseModel, ABC):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     endpoint: str
-    api: TCX_API_Connection
+    api: ThreeCXApiConnection
 
     def get_endpoint(self, resource_id: int | None = None, action: str | None = None) -> str:
         """

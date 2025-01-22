@@ -2,7 +2,7 @@ import pytest
 import requests
 import time
 from unittest.mock import patch, MagicMock, PropertyMock
-from threecxapi.tcx_api_connection import TCX_API_Connection, AuthenticationToken
+from threecxapi.tcx_api_connection import ThreeCXApiConnection, AuthenticationToken
 from threecxapi.exceptions import APIAuthenticationError
 from threecxapi.components.parameters import QueryParameters
 from threecxapi.exceptions import APIAuthenticationError, APIAuthenticationTokenRefreshError
@@ -21,8 +21,8 @@ class TestTCX_API_Connection:
     @pytest.fixture
     def api_connection(self):
         # Get a TCX_API_Connection object with a mocked _make_request method
-        with patch.object(TCX_API_Connection, "_make_request", return_value=MagicMock(spec=requests.Response)):
-            api_connection = TCX_API_Connection(server_url="https://example.com")
+        with patch.object(ThreeCXApiConnection, "_make_request", return_value=MagicMock(spec=requests.Response)):
+            api_connection = ThreeCXApiConnection(server_url="https://example.com")
             api_connection.session = MagicMock(spec=requests.Session)
             yield api_connection
 
@@ -51,7 +51,7 @@ class TestTCX_API_Connection:
         mock_requests_session.return_value = mock_session
 
         # Initialize the object
-        api_connection = TCX_API_Connection(server_url="https://example.com")
+        api_connection = ThreeCXApiConnection(server_url="https://example.com")
 
         # Assert all init variables are set correctly
         assert api_connection.server_url == "https://example.com"
@@ -120,11 +120,11 @@ class TestTCX_API_Connection:
     @patch('threecxapi.tcx_api_connection.requests.Session')
     def test_authenticate_success(self, mock_session_class):
         # Patch token again in the test to track setter calls
-        with patch.object(TCX_API_Connection, 'token', new_callable=PropertyMock) as mock_token:
+        with patch.object(ThreeCXApiConnection, 'token', new_callable=PropertyMock) as mock_token:
             token = {"Token": {"token_type": "Bearer", "expires_in": 3600, "access_token": "access", "refresh_token": "refresh"}}
             mock_response = MagicMock()
             mock_response.json.return_value = token
-            api_connection = TCX_API_Connection(server_url="https://example.com")
+            api_connection = ThreeCXApiConnection(server_url="https://example.com")
             api_connection.session.post.return_value = mock_response
 
             # Call the method that sets self.token
@@ -170,7 +170,7 @@ class TestTCX_API_Connection:
         assert "Authorization" not in headers
 
     def test_make_request_with_expired_token(self, mock_response):
-        api_connection = TCX_API_Connection(server_url="https://example.com")
+        api_connection = ThreeCXApiConnection(server_url="https://example.com")
         mock_session = MagicMock(spec=requests.Session)
         mock_session.request.return_value = mock_response
         api_connection.session = mock_session
@@ -192,7 +192,7 @@ class TestTCX_API_Connection:
         assert response == mock_response
 
     def test_make_request_without_expired_token(self, mock_response):
-        api_connection = TCX_API_Connection(server_url="https://example.com")
+        api_connection = ThreeCXApiConnection(server_url="https://example.com")
         mock_session = MagicMock(spec=requests.Session)
         mock_session.request.return_value = mock_response
         api_connection.session = mock_session

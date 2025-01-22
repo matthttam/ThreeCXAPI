@@ -7,7 +7,7 @@ from pydantic import ValidationError
 from threecxapi.resources.users import ListUserParameters, UserProperties
 from threecxapi.components.parameters import ListParameters
 from threecxapi.resources.users import UsersResource
-from threecxapi.tcx_api_connection import TCX_API_Connection
+from threecxapi.tcx_api_connection import ThreeCXApiConnection
 from threecxapi.components.schemas.pbx import User
 import threecxapi.exceptions as TCX_Exceptions
 
@@ -70,7 +70,7 @@ class TestListUserParameters:
 class TestUserResource:
     @pytest.fixture
     def mock_tcx_api_connection(self):
-        return MagicMock(spec=TCX_API_Connection)
+        return MagicMock(spec=ThreeCXApiConnection)
 
     @pytest.fixture
     def mock_list_user_parameters(self):

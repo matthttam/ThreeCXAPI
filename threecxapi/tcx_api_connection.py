@@ -15,7 +15,7 @@ class AuthenticationToken(NamedTuple):
     refresh_token: str
 
 
-class TCX_API_Connection(API):
+class ThreeCXApiConnection(API):
     default_headers = {"Content-type": "application/json", "Accept": "application/json"}
 
     def __init__(self, *args, server_url, api_path="/xapi/v1", **kwargs):
