@@ -4,6 +4,7 @@ import requests
 import pytest
 from pydantic import ValidationError
 
+from threecxapi.resources.exceptions.users_exceptions import UserCreateError
 from threecxapi.resources.users import ListUserParameters, UserProperties
 from threecxapi.components.parameters import ListParameters
 from threecxapi.resources.users import UsersResource
@@ -67,7 +68,7 @@ class TestListUserParameters:
             test_params.skip = -1
 
 
-class TestUserResource:
+class TestUsersResource:
     @pytest.fixture
     def mock_tcx_api_connection(self):
         return MagicMock(spec=ThreeCXApiConnection)
@@ -100,25 +101,27 @@ class TestUserResource:
         )
         yield user
 
-    # @pytest.fixture
-    # def random_users(self):
-    #     def _random_users(number: int) -> list[User]:
-    #         users = []
-    #         for _ in range(number):
-    #             user = User(
-    #                 Id=random.randint(1, 10000),  # Random ID between 1 and 10,000
-    #                 FirstName=fake.first_name(),  # Random First Name
-    #                 LastName=fake.last_name(),    # Random Last Name
-    #                 Number=fake.phone_number(),   # Random Phone Number
-    #             )
-    #             users.append(user)
-    #         return users
-    #     return _random_users
+    def test_endpoint(self, user_resource):
+        assert user_resource.endpoint == "Users"
 
-    def test_fixtures(self, random_users):
-        users = random_users(100)
-        assert len(users) == 100
-        print(users)
+    def test_create_user_success(self, user_resource):
+        user_dict = {
+            "Id": 123,
+            "FirstName": "TestFirstName",
+            "LastName": "TestLastName",
+            "Number": "123"
+        }
+        user_resource.create_user(user_dict)
+        user_resource.api.post.assert_called_once_with(user_resource.endpoint, user_dict)
+
+    def test_create_user_failure(self, user_resource, user):  
+        mock_response = MagicMock(spec=requests.models.Response)
+        mock_response.status_code = 418
+        user_resource.api.post.side_effect = requests.HTTPError("An Error Occured", response=mock_response)
+        user_dict = user.model_dump()
+
+        with pytest.raises(UserCreateError):
+            user_resource.create_user(user_dict)
 
     def test_list_user_with_single_result(self, mock_list_user_parameters, user_resource, user):
         api_response = {"value": [user.model_dump()]}
@@ -189,3 +192,27 @@ class TestUserResource:
         user_resource.api.get.assert_called_once_with(
             endpoint=f"Users({id})", params=params
         )
+
+    def test_update_user_success(self, user_resource):
+        ...
+
+    def test_update_user_failure(self, user_resource):
+        ...
+
+    def test_delete_user(self, user_resource):
+        ...
+
+    def test_get_hotdesks_by_assigned_user_number(self, user_resource):
+        ...
+    
+    def test_clear_hotdesk_assignment(self, user_resource):
+        ...
+    
+    def test_has_duplicate_email(self, user_resource):
+        ...
+    
+    def test_get_user_id(self, user_resource):
+        ...
+    
+    def test_get_new_user(self):
+        ...

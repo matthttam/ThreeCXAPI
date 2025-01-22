@@ -1,3 +1,3 @@
 [tool.pytest.ini_options]
-addopts = ["--import-mode=importlib"]
+addopts = ["--import-mode=importlib","-vvvv", "--showlocals", "-p no:xvfb", "-r a", "--doctest-glob="]
 pythonpath = "."

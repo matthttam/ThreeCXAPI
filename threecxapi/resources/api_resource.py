@@ -23,8 +23,8 @@ class APIResource(BaseModel, ABC):
             endpoint = f"{self.endpoint}({resource_id})"
         else:
             endpoint = self.endpoint
-        
+
         if action:
             endpoint += f"/{action}"
-        
+
         return endpoint

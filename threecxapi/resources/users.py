@@ -4,6 +4,7 @@ from pydantic import TypeAdapter
 import requests
 
 from typing import List
+from threecxapi.components.responses.pbx import UserCollectionResponse
 from threecxapi.resources.api_resource import APIResource
 from threecxapi.util import create_enum_from_model
 
@@ -39,22 +40,7 @@ class GetUserParameters(SelectParameters[UserProperties], ExpandParameters):
 
 class UsersResource(APIResource):
     """Provides operations to manage the collection of User entities."""
-
     endpoint: str = "Users"
-
-    def get_endpoint(self, user_id: int | None = None) -> str:
-        """
-        Returns the appropriate endpoint for users or a specific user.
-
-        Args:
-            user_id (Optional[int]): The ID of the user, if provided. If None, returns the endpoint for all users.
-
-        Returns:
-            str: The formatted endpoint string.
-        """
-        if user_id:
-            return f"{self.endpoint}({user_id})"
-        return self.endpoint
 
     def create_user(self, user: dict):
         """
@@ -77,7 +63,8 @@ class UsersResource(APIResource):
             user_data = {
                 "Id": 1234,
                 "Name": "John Doe",
-                "Email": "john.doe@example.com"
+                "Email": "john.doe@example.com",
+                "Number": "5555551234"
             }
             create_user(user_data)
         """
@@ -114,8 +101,7 @@ class UsersResource(APIResource):
         """
         try:
             response = self.api.get(self.get_endpoint(), params)
-            response_value = response.json().get("value")
-            return TypeAdapter(List[User]).validate_python(response_value)
+            return TypeAdapter(UserCollectionResponse).validate_python(response.json())
         except requests.HTTPError as e:
             raise UserListError(e)
 

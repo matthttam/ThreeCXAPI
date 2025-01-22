@@ -3,12 +3,10 @@ import requests
 import time
 from unittest.mock import patch, MagicMock, PropertyMock
 from threecxapi.tcx_api_connection import ThreeCXApiConnection, AuthenticationToken
-from threecxapi.exceptions import APIAuthenticationError
-from threecxapi.components.parameters import QueryParameters
 from threecxapi.exceptions import APIAuthenticationError, APIAuthenticationTokenRefreshError
 
 
-class TestTCX_API_Connection:
+class TestThreeCXApiConnection:
 
     @pytest.fixture
     def mock_response(self):
@@ -61,7 +59,7 @@ class TestTCX_API_Connection:
         assert api_connection._token is None
 
     def test_get_api_endpoint_url(self, api_connection):
-        assert api_connection.get_api_endpoint_url("endpoint") == "https://example.com/xapi/v1/endpoint"
+        assert api_connection._get_api_endpoint_url("endpoint") == "https://example.com/xapi/v1/endpoint"
 
     def test_get_with_params(self, api_connection, mock_response):
         # Set up our mock response from the _make_request method
@@ -121,7 +119,14 @@ class TestTCX_API_Connection:
     def test_authenticate_success(self, mock_session_class):
         # Patch token again in the test to track setter calls
         with patch.object(ThreeCXApiConnection, 'token', new_callable=PropertyMock) as mock_token:
-            token = {"Token": {"token_type": "Bearer", "expires_in": 3600, "access_token": "access", "refresh_token": "refresh"}}
+            token = {
+                "Token": {
+                            "token_type": "Bearer",
+                            "expires_in": 3600,
+                            "access_token": "access",
+                            "refresh_token": "refresh"
+                         }
+                    }
             mock_response = MagicMock()
             mock_response.json.return_value = token
             api_connection = ThreeCXApiConnection(server_url="https://example.com")
@@ -178,7 +183,7 @@ class TestTCX_API_Connection:
         method = "method"
         endpoint = "endpoint"
         other_argument = {"other_argument": 100}
-        endpoint_url = api_connection.get_api_endpoint_url(endpoint)
+        endpoint_url = api_connection._get_api_endpoint_url(endpoint)
         headers = api_connection._get_headers()
 
         # Perform call where _is_token_expired is False and mock _refresh_access_token
@@ -200,7 +205,7 @@ class TestTCX_API_Connection:
         method = "method"
         endpoint = "endpoint"
         other_argument = {"other_argument": 100}
-        endpoint_url = api_connection.get_api_endpoint_url(endpoint)
+        endpoint_url = api_connection._get_api_endpoint_url(endpoint)
         headers = api_connection._get_headers()
 
         # Perform call where _is_token_expired is False and mock _refresh_access_token

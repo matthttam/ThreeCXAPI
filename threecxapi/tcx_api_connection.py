@@ -38,9 +38,6 @@ class ThreeCXApiConnection(API):
         self._token = AuthenticationToken(**token)
         self._update_token_expiry_time(self.token.expires_in)
 
-    def get_api_endpoint_url(self, endpoint):
-        return self.api_url + "/" + endpoint
-
     def get(self, endpoint: str, params: QueryParameters | None = None) -> requests.Response:
         request_params = params.model_dump(exclude_none=True, by_alias=True) if params else None
         return self._make_request(
@@ -114,6 +111,9 @@ class ThreeCXApiConnection(API):
         token = json_response.get("Token", {})
         self.token = token
 
+    def _get_api_endpoint_url(self, endpoint):
+        return self.api_url + "/" + endpoint
+
     def _refresh_access_token(self) -> None:
         # Get Access Token
         data = {
@@ -168,7 +168,7 @@ class ThreeCXApiConnection(API):
         Raises:
             requests.exceptions.HTTPError: If the HTTP request returned an unsuccessful status code.
         """
-        url = self.get_api_endpoint_url(endpoint)
+        url = self._get_api_endpoint_url(endpoint)
         if self._is_token_expired():
             self._refresh_access_token()
 
