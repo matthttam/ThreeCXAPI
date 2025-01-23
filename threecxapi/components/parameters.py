@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import List, Optional, TypeVar, Generic
+from typing import Optional, TypeVar, Generic
 from pydantic import BaseModel, Field
 from enum import Enum
 
@@ -45,7 +45,7 @@ class SelectParameters(QueryParameters, Generic[E]):
     Attributes:
         select (list): Select properties to be returned.
     """
-    select: Optional[List[E]] = Field(
+    select: Optional[list[E]] = Field(
         default=None, serialization_alias="$select")
 
 

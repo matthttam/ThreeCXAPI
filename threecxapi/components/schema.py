@@ -1,5 +1,10 @@
 from typing import Any
+from enum import auto
+from functools import lru_cache
+
 from pydantic import BaseModel, ConfigDict
+
+from threecxapi.util import TcxStrEnum
 
 
 class Schema(BaseModel):
@@ -18,3 +23,13 @@ class Schema(BaseModel):
         default_options.update(kwargs)
         # Call the original model_dump with the updated options
         return super().model_dump(**default_options)
+
+    @classmethod
+    @lru_cache
+    def to_enum(cls) -> TcxStrEnum:
+        """Creates an Enum based on the fields of the Schema class."""
+        # Create a new TcxStrEnum
+        return TcxStrEnum(
+            cls.__name__ + "Properties",
+            {field_name: auto() for field_name in cls.__annotations__.keys()}
+        )

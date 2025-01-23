@@ -1,13 +1,12 @@
 import string
 import random
-from pydantic import TypeAdapter
 import requests
+
+from pydantic import TypeAdapter
 
 from threecxapi.components.responses.pbx import UserCollectionResponse
 from threecxapi.resources.api_resource import APIResource
 from threecxapi.util import create_enum_from_model
-
-
 from threecxapi.components.responses.other import HasDuplicatedEmailResponse
 from threecxapi.components.schemas.pbx import User
 from threecxapi.components.parameters import (
@@ -169,7 +168,7 @@ class UsersResource(APIResource):
         except requests.HTTPError as e:
             raise UserUpdateError(e, user)
 
-    def delete_user(self, user: User | int) -> None:
+    def delete_user(self, user: User) -> None:
         """
         Deletes a user entity by sending a DELETE request to the Users endpoint.
 
@@ -178,9 +177,9 @@ class UsersResource(APIResource):
         If the API call fails with an HTTP error, a `UserDeleteError` exception is raised.
 
         Args:
-            user (User | int): The `User` object or user ID representing the user to be deleted.
+            user (User): The `User` object representing the user to be deleted.
                             If a `User` object is provided, the method extracts the ID
-                            from the object. If an integer is provided, it is used as the ID.
+                            from the object.
 
         Raises:
             UserDeleteError: If there is an issue deleting the user, such as an HTTP error
@@ -190,9 +189,6 @@ class UsersResource(APIResource):
             # Deleting a user by passing a User object
             user = User(Id=1234)
             delete_user(user)
-
-            # Deleting a user by passing the user ID directly
-            delete_user(1234)
         """
         try:
             self.api.delete(endpoint=self.get_endpoint(), params=user.Id)
@@ -240,7 +236,7 @@ class UsersResource(APIResource):
         Once the request is processed, the hotdesk will no longer have any user signed in to it.
 
         Args:
-            user User: The hotdesk user to log any user out of. Can be either a `User` object or a user ID.
+            user (User): The hotdesk user to log any user out of. Can be either a `User` object or a user ID.
 
         Raises:
             UserHotdeskLogoutError: If there is an error with the PATCH request.
