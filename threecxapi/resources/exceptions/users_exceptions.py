@@ -7,7 +7,7 @@ class UserCreateError(APIError):
     """Error raised when there is an issue creating a user."""
 
     def __init__(self, e: HTTPError, user: dict):
-        user_number = getattr(user, "Number", "N/A")
+        user_number = user.get("Number", "N/A")
         error_message = f"Unable to create user with number {user_number}."
         super().__init__(e, error_message)
 
@@ -63,4 +63,11 @@ class UserHotdeskLookupError(APIError):
 
     def __init__(self, e: HTTPError, user_number: str):
         error_message = f"Unable to retrieve hotdesks for user with number {user_number}."
+        super().__init__(e, error_message)
+
+
+class UserHasDuplicatedEmailError(APIError):
+    """Error raised when there is an issue determining if a user has a duplicated email."""
+    def __init__(self, e: HTTPError, user_id: str):
+        error_message = f"Unable to determine if user with ID {user_id} has a duplicated email."
         super().__init__(e, error_message)

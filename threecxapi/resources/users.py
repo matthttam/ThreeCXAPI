@@ -3,7 +3,6 @@ import random
 from pydantic import TypeAdapter
 import requests
 
-from typing import List
 from threecxapi.components.responses.pbx import UserCollectionResponse
 from threecxapi.resources.api_resource import APIResource
 from threecxapi.util import create_enum_from_model
@@ -25,6 +24,7 @@ from threecxapi.resources.exceptions.users_exceptions import (
     UserDeleteError,
     UserHotdeskLogoutError,
     UserHotdeskLookupError,
+    UserHasDuplicatedEmailError
 )
 
 UserProperties = create_enum_from_model(User)
@@ -68,13 +68,12 @@ class UsersResource(APIResource):
             }
             create_user(user_data)
         """
-
         try:
             self.api.post(self.get_endpoint(), user)
         except requests.HTTPError as e:
             raise UserCreateError(e, user)
 
-    def list_user(self, params: ListUserParameters) -> List[User]:
+    def list_user(self, params: ListUserParameters) -> list[User]:
         """
         Retrieves a list of users by sending a GET request to the Users endpoint.
 
@@ -159,7 +158,6 @@ class UsersResource(APIResource):
             user = User(Id=1234, Name="Updated Name")
             update_user(user)
         """
-        user_id = self.get_user_id(user)
         try:
             user_dict = user.model_dump(
                 exclude_unset=True,
@@ -167,7 +165,7 @@ class UsersResource(APIResource):
                 serialize_as_any=True,
                 by_alias=True,
             )
-            self.api.patch(endpoint=self.get_endpoint(user_id), data=user_dict)
+            self.api.patch(endpoint=self.get_endpoint(user.Id), data=user_dict)
         except requests.HTTPError as e:
             raise UserUpdateError(e, user)
 
@@ -196,17 +194,14 @@ class UsersResource(APIResource):
             # Deleting a user by passing the user ID directly
             delete_user(1234)
         """
-        user_id = self.get_user_id(user)
         try:
-            self.api.delete(endpoint=self.get_endpoint(), params=user_id)
+            self.api.delete(endpoint=self.get_endpoint(), params=user.Id)
         except requests.HTTPError as e:
-            raise UserDeleteError(e, user_id)
+            raise UserDeleteError(e, user.Id)
 
-    def get_hotdesks_by_assigned_user_number(
-        self, user_number: str
-    ) -> List[User] | None:
+    def get_hotdesks_by_assigned_user_number(self, user_number: str) -> list[User] | None:
         """
-        Retrieves the hotdesk assigned to a given user based on their user number.
+        Retrieves the hotdesk(s) assigned to a given user based on their user number.
 
         This method searches for a hotdesk associated with the specified user number
         using the "HotdeskingAssignment" field. If a match is found, the first user
@@ -217,13 +212,14 @@ class UsersResource(APIResource):
             user_number (str): The user number to search for a hotdesk assignment.
 
         Returns:
-            User | None: A `User` object representing the hotdesk if found, or `None`
+            list[User] | None: A `User` object representing the hotdesk if found, or `None`
             if no hotdesk is assigned to the given user number.
 
         Example:
-            hotdesk_user = get_hotdesk_by_assigned_user_number("1234")
-            if hotdesk_user:
-                print(f"User is assigned to hotdesk {hotdesk_user.Number}")
+            hotdesk_users = get_hotdesks_by_assigned_user_number("1234")
+            if hotdesk_users:
+                hotdesk_numbers = ", ".join([user.Number for user in hotdesk_users])
+                print(f"User is assigned to hotdesks: {hotdesk_numbers}")
             else:
                 print("No hotdesk assigned to this user.")
         """
@@ -235,7 +231,7 @@ class UsersResource(APIResource):
         except requests.HTTPError as e:
             raise UserHotdeskLookupError(e, user_number)
 
-    def clear_hotdesk_assignment(self, hotdesk_user: User | int):
+    def clear_hotdesk_assignment(self, hotdesk_user: User):
         """
         Clear a hotdesk user assignment.
 
@@ -244,7 +240,7 @@ class UsersResource(APIResource):
         Once the request is processed, the hotdesk will no longer have any user signed in to it.
 
         Args:
-            user (User | int): The hotdesk user to log any user out of. Can be either a `User` object or a user ID.
+            user User: The hotdesk user to log any user out of. Can be either a `User` object or a user ID.
 
         Raises:
             UserHotdeskLogoutError: If there is an error with the PATCH request.
@@ -253,44 +249,21 @@ class UsersResource(APIResource):
             # Using a hotdesk User object
             hotdesk = get_hotdesk_by_assigned_user_number(user_number=1234)
             clear_hotdesk_assignment(hotdesk)
-
-            # Using a hotdesk user ID
-            clear_hotdesk_assignment(34)
         """
-        hotdesk_user_id = self.get_user_id(hotdesk_user)
         try:
             self.api.patch(
-                endpoint=self.get_endpoint(hotdesk_user_id),
+                endpoint=self.get_endpoint(hotdesk_user.Id),
                 data={"HotdeskingAssignment": ""},
             )
         except requests.HTTPError as e:
-            UserHotdeskLogoutError(e, hotdesk_user_id)
+            raise UserHotdeskLogoutError(e, hotdesk_user.Id)
 
-    def has_duplicate_email(self, user: User | int):
-        return
-        """ Not fully implemented yet """
-        user_id = self.get_user_id(user)
+    def has_duplicated_email(self, user: User):
         try:
-            response = self.api.get(
-                f"{self.get_endpoint(user_id)}/Pbx.HasDuplicatedEmail()"
-            )
-            HasDuplicatedEmailResponse(response)
+            response = self.api.get(endpoint=self.get_endpoint(user.Id, "Pbx.HasDuplicatedEmail()"))
+            return TypeAdapter(HasDuplicatedEmailResponse).validate_python(response.json())
         except requests.HTTPError as e:
-            UserGetError(e, user_id)
-
-    def get_user_id(self, user: User | int) -> int:
-        """
-        Helper method to extract the user ID from either a User object or an integer.
-
-        Args:
-            user (User | int): The user object or user ID.
-
-        Returns:
-            int: The user ID.
-        """
-        if isinstance(user, User):
-            return user.Id
-        return user
+            raise UserHasDuplicatedEmailError(e, user.Id)
 
     def get_new_user(self):
         auth_id = "".join(random.choices(string.ascii_letters + string.digits, k=10))
