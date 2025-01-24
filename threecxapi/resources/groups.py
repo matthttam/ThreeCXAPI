@@ -2,10 +2,7 @@ import requests
 
 from pydantic import TypeAdapter
 
-from threecxapi.components.responses.pbx import (
-    GroupCollectionResponse,
-    UserGroupCollectionResponse
-)
+from threecxapi.components.responses.pbx import GroupCollectionResponse, UserGroupCollectionResponse
 from threecxapi.resources.api_resource import APIResource
 from threecxapi.components.schemas.pbx import Group, UserGroup, Rights
 from threecxapi.components.parameters import (
@@ -17,36 +14,38 @@ from threecxapi.components.parameters import (
 
 from threecxapi.resources.exceptions.groups_exceptions import (
     GroupCreateError,
+    GroupLinkGroupPartnerError,
     GroupListError,
     GroupDeleteError,
     GroupGetError,
+    GroupReplaceGroupLicenseKey,
+    GroupUnlinkGroupPartnerError,
     GroupUpdateError,
     GroupGetRestrictionsError,
     GroupDeleteCompanyByNumberError,
     GroupDeleteCompanyByIdError,
     GroupListMembersError,
-    GroupListRightsError
+    GroupListRightsError,
 )
 
 
-class ListGroupParameters(ListParameters, OrderbyParameters, 
-                          SelectParameters[Group.to_enum()], ExpandParameters):
-    ...
+class ListGroupParameters(ListParameters, OrderbyParameters, SelectParameters[Group.to_enum()], ExpandParameters): ...
 
 
-class GetGroupParameters(SelectParameters[Group.to_enum()], ExpandParameters):
-    ...
+class GetGroupParameters(SelectParameters[Group.to_enum()], ExpandParameters): ...
 
 
-class ListUserGroupParameters(ListParameters, OrderbyParameters,
-                              SelectParameters[UserGroup.to_enum()], ExpandParameters):
+class ListUserGroupParameters(
+    ListParameters, OrderbyParameters, SelectParameters[UserGroup.to_enum()], ExpandParameters
+):
     """Used to fetch members of a group."""
+
     ...
 
 
-class ListGroupRightsParameters(ListParameters, OrderbyParameters,
-                                SelectParameters[Rights.to_enum()], ExpandParameters):
-    ...
+class ListGroupRightsParameters(
+    ListParameters, OrderbyParameters, SelectParameters[Rights.to_enum()], ExpandParameters
+): ...
 
 
 class GroupsResource(APIResource):
@@ -108,19 +107,13 @@ class GroupsResource(APIResource):
 
     def delete_company_by_number(self, number: str):
         try:
-            self.api.post(
-                endpoint=self.get_endpoint(None, "Pbx.DeleteCompanyByNumber"),
-                data={"number": number}
-                )
+            self.api.post(endpoint=self.get_endpoint(None, "Pbx.DeleteCompanyByNumber"), data={"number": number})
         except requests.HTTPError as e:
             raise GroupDeleteCompanyByNumberError(e, number)
 
     def delete_company_by_id(self, id: int):
         try:
-            self.api.post(
-                endpoint=self.get_endpoint(None, "Pbx.DeleteCompanyById"),
-                data={"id": id}
-                )
+            self.api.post(endpoint=self.get_endpoint(None, "Pbx.DeleteCompanyById"), data={"id": id})
         except requests.HTTPError as e:
             raise GroupDeleteCompanyByIdError(e, id)
 
@@ -140,14 +133,32 @@ class GroupsResource(APIResource):
         except requests.HTTPError as e:
             raise GroupListRightsError(e)
 
-    def replace_group_license_key(self):
-        ...
+    def replace_group_license_key(self, license_key: str, group: Group):
+        try:
+            self.api.post(
+                endpoint=self.get_endpoint(None, "Pbx.ReplaceGroupLicenseKey"),
+                data={"licenseKey": license_key, "groupId": group.Id},
+            )
+        except requests.HTTPError as e:
+            raise GroupReplaceGroupLicenseKey(e, group.Id)
 
-    def link_group_partner(self):
-        ...
+    def link_group_partner(self, reseller_id: str, group: Group):
+        try:
+            self.api.post(
+                endpoint=self.get_endpoint(None, "Pbx.LinkGroupPartner"),
+                data={"resellerId": reseller_id, "groupId": group.Id},
+            )
+        except requests.HTTPError as e:
+            raise GroupLinkGroupPartnerError(e, group.Id)
 
     def unlink_group_partner(self):
-        ...
+        try:
+            self.api.post(
+                endpoint=self.get_endpoint(None, "Pbx.UnlinkGroupPartner"),
+                data={},
+            )
+        except requests.HTTPError as e:
+            raise GroupUnlinkGroupPartnerError(e)
 
     # Custom Helpers
     def get_group_defaults(self):

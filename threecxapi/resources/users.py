@@ -195,6 +195,7 @@ class UsersResource(APIResource):
         except requests.HTTPError as e:
             raise UserDeleteError(e, user.Id)
 
+    # User Special Actions
     def get_hotdesks_by_assigned_user_number(self, user_number: str) -> list[User] | None:
         """
         Retrieves the hotdesk(s) assigned to a given user based on their user number.
@@ -261,6 +262,7 @@ class UsersResource(APIResource):
         except requests.HTTPError as e:
             raise UserHasDuplicatedEmailError(e, user.Id)
 
+    # Custom Helpers
     def get_new_user(self):
         auth_id = "".join(random.choices(string.ascii_letters + string.digits, k=10))
         return {
