@@ -40,9 +40,7 @@ class ThreeCXApiConnection(API):
 
     def get(self, endpoint: str, params: QueryParameters | None = None) -> requests.Response:
         request_params = params.model_dump(exclude_none=True, by_alias=True) if params else None
-        return self._make_request(
-            "get", endpoint, params=request_params
-        )
+        return self._make_request("get", endpoint, params=request_params)
 
     def post(self, endpoint: str, data: dict) -> requests.Response:
         """
@@ -172,8 +170,6 @@ class ThreeCXApiConnection(API):
         if self._is_token_expired():
             self._refresh_access_token()
 
-        response = self.session.request(
-            method, url, headers=self._get_headers(), **kwargs
-        )
+        response = self.session.request(method, url, headers=self._get_headers(), **kwargs)
         response.raise_for_status()
         return response

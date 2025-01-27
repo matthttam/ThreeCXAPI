@@ -4,8 +4,7 @@ from pydantic import BaseModel, Field
 from enum import Enum
 
 
-class QueryParameters(BaseModel, ABC, validate_assignment=True):
-    ...
+class QueryParameters(BaseModel, ABC, validate_assignment=True): ...
 
 
 class ListParameters(QueryParameters):
@@ -16,9 +15,9 @@ class ListParameters(QueryParameters):
     filter (str): The filter to apply.
     count (bool): Indicates if a count should be returned or not.
     """
+
     top: Optional[int] = Field(default=None, ge=0, serialization_alias="$top")
-    skip: Optional[int] = Field(
-        default=None, ge=0, serialization_alias="$skip")
+    skip: Optional[int] = Field(default=None, ge=0, serialization_alias="$skip")
     search: Optional[str] = Field(default=None, serialization_alias="$search")
     filter: Optional[str] = Field(default=None, serialization_alias="$filter")
     count: Optional[bool] = Field(default=None, serialization_alias="$count")
@@ -31,11 +30,11 @@ class OrderbyParameters(QueryParameters):
     Attributes:
         orderby (str): The field to order by.
     """
-    orderby: Optional[str] = Field(
-        default=None, serialization_alias="$orderby")
+
+    orderby: Optional[str] = Field(default=None, serialization_alias="$orderby")
 
 
-E = TypeVar('E', bound=Enum)
+E = TypeVar("E", bound=Enum)
 
 
 class SelectParameters(QueryParameters, Generic[E]):
@@ -45,8 +44,8 @@ class SelectParameters(QueryParameters, Generic[E]):
     Attributes:
         select (list): Select properties to be returned.
     """
-    select: Optional[list[E]] = Field(
-        default=None, serialization_alias="$select")
+
+    select: Optional[list[E]] = Field(default=None, serialization_alias="$select")
 
 
 class ExpandParameters(QueryParameters):
@@ -55,4 +54,5 @@ class ExpandParameters(QueryParameters):
     Attributes:
         expand (str): Expand related entities.
     """
+
     expand: Optional[str] = Field(default=None, serialization_alias="$expand")

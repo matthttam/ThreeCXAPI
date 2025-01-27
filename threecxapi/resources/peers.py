@@ -17,8 +17,8 @@ from threecxapi.util import create_enum_from_model
 
 PeerProperties = create_enum_from_model(Peer)
 
-class ListPeerParameters(ListParameters, OrderbyParameters, SelectParameters[PeerProperties], ExpandParameters):
-    ...
+
+class ListPeerParameters(ListParameters, OrderbyParameters, SelectParameters[PeerProperties], ExpandParameters): ...
 
 
 class PeersResource(APIResource):
@@ -37,9 +37,7 @@ class PeersResource(APIResource):
 
     def get_peer_by_number(self, user_number: str) -> Peer | None:
         try:
-            response = self.api.get(
-                f"{self.get_endpoint()}/Pbx.GetPeerByNumber(number='{user_number}')"
-            )
+            response = self.api.get(f"{self.get_endpoint()}/Pbx.GetPeerByNumber(number='{user_number}')")
             response_value = response.json().get("value")
             return TypeAdapter(Peer).validate_python(response_value)
         except requests.HTTPError as e:

@@ -23,22 +23,21 @@ from threecxapi.resources.exceptions.users_exceptions import (
     UserDeleteError,
     UserHotdeskLogoutError,
     UserHotdeskLookupError,
-    UserHasDuplicatedEmailError
+    UserHasDuplicatedEmailError,
 )
 
 UserProperties = create_enum_from_model(User)
 
 
-class ListUserParameters(ListParameters, OrderbyParameters, SelectParameters[UserProperties], ExpandParameters):
-    ...
+class ListUserParameters(ListParameters, OrderbyParameters, SelectParameters[UserProperties], ExpandParameters): ...
 
 
-class GetUserParameters(SelectParameters[UserProperties], ExpandParameters):
-    ...
+class GetUserParameters(SelectParameters[UserProperties], ExpandParameters): ...
 
 
 class UsersResource(APIResource):
     """Provides operations to manage the collection of User entities."""
+
     endpoint: str = "Users"
 
     def create_user(self, user: dict):

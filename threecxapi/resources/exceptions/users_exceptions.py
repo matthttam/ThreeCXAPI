@@ -33,9 +33,7 @@ class UserUpdateError(APIError):
     def __init__(self, e: HTTPError, user: User):
         user_id = user.Id
         user_number = getattr(user, "Number", "N/A")
-        error_message = (
-            f"Unable to update user with ID {user_id} and number {user_number}."
-        )
+        error_message = f"Unable to update user with ID {user_id} and number {user_number}."
         super().__init__(e, error_message)
 
 
@@ -52,8 +50,7 @@ class UserHotdeskLogoutError(APIError):
 
     def __init__(self, e: HTTPError, hotdesk_user_id: int):
         error_message = (
-            "Unable to clear hotdesking assignment of hotdesk with ID "
-            f"{hotdesk_user_id} out of assigned hotdesk."
+            "Unable to clear hotdesking assignment of hotdesk with ID " f"{hotdesk_user_id} out of assigned hotdesk."
         )
         super().__init__(e, error_message)
 
@@ -68,6 +65,7 @@ class UserHotdeskLookupError(APIError):
 
 class UserHasDuplicatedEmailError(APIError):
     """Error raised when there is an issue determining if a user has a duplicated email."""
+
     def __init__(self, e: HTTPError, user_id: str):
         error_message = f"Unable to determine if user with ID {user_id} has a duplicated email."
         super().__init__(e, error_message)

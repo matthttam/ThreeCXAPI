@@ -33,9 +33,7 @@ class PeerUpdateError(APIError):
     def __init__(self, e: HTTPError, peer: Peer):
         peer_id = peer.Id
         peer_number = getattr(peer, "Number", "N/A")
-        error_message = (
-            f"Unable to update peer with ID {peer_id} and number {peer_number}."
-        )
+        error_message = f"Unable to update peer with ID {peer_id} and number {peer_number}."
         super().__init__(e, error_message)
 
 

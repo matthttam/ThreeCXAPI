@@ -4,6 +4,7 @@ from json import JSONDecodeError
 from pydantic import TypeAdapter
 from pydantic_core import ValidationError
 
+
 class APIError(Exception):
     """Base class for API-related errors."""
 
@@ -37,22 +38,23 @@ class APIError(Exception):
             return f"{self.message} OData Error: {self.odata_error.error.message}"
         return self.message
 
+
 # class APIError(Exception):
 #     """Base class for API-related errors."""
-# 
+#
 #     def __init__(self, e: HTTPError, message: str = ""):
 #         super().__init__(message)
 #         self._http_error = e
 #         self.message = message
 #         self.api_error_message = ""
 #         self._parse_http_error()
-# 
+#
 #     def _parse_http_error(self):
 #         """Parses the HTTPError and sets the api_error_message."""
 #         if not hasattr(self._http_error, "response") or not self._http_error.response:
 #             self.api_error_message = f"HTTP Error: {self._http_error}"
 #             return
-# 
+#
 #         response_text = self._http_error.response.text or {}
 #         if response_text:
 #             try:
@@ -63,7 +65,7 @@ class APIError(Exception):
 #                 self.api_error_message = f"Failed to parse error response: {ex}"
 #         else:
 #             self.api_error_message = f"HTTP Error: {self._http_error.response.reason}"
-# 
+#
 #     def _format_main_error(self, main_error: MainError) -> str:
 #         """Formats the MainError into a readable string."""
 #         message = f"{f'[{main_error.code}] ' if main_error.code else ''}{main_error.message or 'Unknown error'}"
@@ -71,11 +73,11 @@ class APIError(Exception):
 #             for detail in main_error.details:
 #                 message += "\n" + self._format_error_details(detail)
 #         return message
-# 
+#
 #     def _format_error_details(self, detail: ErrorDetails) -> str:
 #         """Formats individual error details into a readable string."""
 #         return f"[{detail.code}] {detail.message}{f' {detail.target}' if detail.target else ''}"
-# 
+#
 #     def __str__(self) -> str:
 #         """Returns a string representation of the error."""
 #         return f"{self.message} {self.api_error_message}"
@@ -89,6 +91,7 @@ class APIAuthenticationError(Exception):
         status_code (int): The HTTP response status code.
         error_message (str): The error message from the original exception.
     """
+
     def __init__(self, original_exception: HTTPError):
         self.original_exception = original_exception
 

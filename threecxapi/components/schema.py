@@ -30,6 +30,5 @@ class Schema(BaseModel):
         """Creates an Enum based on the fields of the Schema class."""
         # Create a new TcxStrEnum
         return TcxStrEnum(
-            cls.__name__ + "Properties",
-            {field_name: auto() for field_name in cls.__annotations__.keys()}
+            cls.__name__ + "Properties", {field_name: auto() for field_name in cls.__annotations__.keys()}
         )
