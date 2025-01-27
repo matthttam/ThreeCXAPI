@@ -15,10 +15,7 @@ from threecxapi.resources.exceptions.peers_exceptions import PeerListError, Peer
 from threecxapi.util import create_enum_from_model
 
 
-PeerProperties = create_enum_from_model(Peer)
-
-
-class ListPeerParameters(ListParameters, OrderbyParameters, SelectParameters[PeerProperties], ExpandParameters): ...
+class ListPeerParameters(ListParameters, OrderbyParameters, SelectParameters[Peer.to_enum()], ExpandParameters): ...
 
 
 class PeersResource(APIResource):

@@ -23,13 +23,11 @@ from threecxapi.resources.exceptions.trunks_exceptions import (
     CallTelegramSessionError,
 )
 
-TrunkProperties = create_enum_from_model(Trunk)
+
+class ListTrunkParameters(ListParameters, OrderbyParameters, SelectParameters[Trunk.to_enum()], ExpandParameters): ...
 
 
-class ListTrunkParameters(ListParameters, OrderbyParameters, SelectParameters[TrunkProperties], ExpandParameters): ...
-
-
-class GetTrunkParameters(SelectParameters[TrunkProperties], ExpandParameters): ...
+class GetTrunkParameters(SelectParameters[Trunk.to_enum()], ExpandParameters): ...
 
 
 class TrunksResource(APIResource):

@@ -26,13 +26,11 @@ from threecxapi.resources.exceptions.users_exceptions import (
     UserHasDuplicatedEmailError,
 )
 
-UserProperties = create_enum_from_model(User)
+
+class ListUserParameters(ListParameters, OrderbyParameters, SelectParameters[User.to_enum()], ExpandParameters): ...
 
 
-class ListUserParameters(ListParameters, OrderbyParameters, SelectParameters[UserProperties], ExpandParameters): ...
-
-
-class GetUserParameters(SelectParameters[UserProperties], ExpandParameters): ...
+class GetUserParameters(SelectParameters[User.to_enum()], ExpandParameters): ...
 
 
 class UsersResource(APIResource):
