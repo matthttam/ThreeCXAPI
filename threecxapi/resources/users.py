@@ -6,7 +6,6 @@ from pydantic import TypeAdapter
 
 from threecxapi.components.responses.pbx import UserCollectionResponse
 from threecxapi.resources.api_resource import APIResource
-from threecxapi.util import create_enum_from_model
 from threecxapi.components.responses.other import HasDuplicatedEmailResponse
 from threecxapi.components.schemas.pbx import User
 from threecxapi.components.parameters import (

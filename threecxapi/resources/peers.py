@@ -12,7 +12,6 @@ from threecxapi.components.parameters import (
 from threecxapi.resources.api_resource import APIResource
 from threecxapi.components.schemas.pbx import Peer
 from threecxapi.resources.exceptions.peers_exceptions import PeerListError, PeerGetError
-from threecxapi.util import create_enum_from_model
 
 
 class ListPeerParameters(ListParameters, OrderbyParameters, SelectParameters[Peer.to_enum()], ExpandParameters): ...

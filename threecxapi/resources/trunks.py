@@ -2,7 +2,6 @@ import requests
 from pydantic import TypeAdapter
 from typing import List
 from threecxapi.resources.api_resource import APIResource
-from threecxapi.util import create_enum_from_model
 from threecxapi.components.schemas.pbx import Trunk, XTelegramAuth
 from threecxapi.components.parameters import (
     ExpandParameters,
