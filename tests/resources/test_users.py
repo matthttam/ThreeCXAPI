@@ -12,9 +12,9 @@ from threecxapi.resources.exceptions.users_exceptions import (
     UserHotdeskLogoutError,
     UserHotdeskLookupError,
     UserUpdateError,
-    UserHasDuplicatedEmailError
+    UserHasDuplicatedEmailError,
 )
-from threecxapi.resources.users import ListUserParameters, UserProperties
+from threecxapi.resources.users import ListUserParameters
 from threecxapi.components.parameters import ListParameters
 from threecxapi.resources.users import UsersResource
 from threecxapi.tcx_api_connection import ThreeCXApiConnection
@@ -25,18 +25,12 @@ import threecxapi.exceptions as TCX_Exceptions
 @pytest.fixture
 def user_error():
     return {
-                "error": {
-                    "code": "",
-                    "message": "SAMPLE_FIELD:\nWARNINGS.XAPI.SAMPLE_ERROR",
-                    "details": [
-                        {
-                            "code": "",
-                            "message": "WARNINGS.XAPI.SAMPLE_ERROR",
-                            "target": "SAMPLE_FIELD"
-                        }
-                    ]
-                }
-            }
+        "error": {
+            "code": "",
+            "message": "SAMPLE_FIELD:\nWARNINGS.XAPI.SAMPLE_ERROR",
+            "details": [{"code": "", "message": "WARNINGS.XAPI.SAMPLE_ERROR", "target": "SAMPLE_FIELD"}],
+        }
+    }
 
 
 @pytest.fixture
@@ -46,9 +40,11 @@ def mock_response(user_error):
     mock_response.json.return_value = user_error
     yield mock_response
 
+
 @pytest.fixture
 def http_error(mock_response):
     yield requests.HTTPError("An Error Occured", response=mock_response)
+
 
 class TestListUserParameters:
 
@@ -60,13 +56,11 @@ class TestListUserParameters:
         assert isinstance(test_list_user_parameters, ListUserParameters)
 
     def test_valid_select(self):
-        select = list(UserProperties)
-        params = ListUserParameters(select=select)
+        params = ListUserParameters(select=User.to_enum())
         assert isinstance(params, ListUserParameters)
 
     def test_invalid_select(self):
-        select = list(UserProperties)
-        select.append("INVALID_VALUE")
+        select = ["INVALID_VALUE"]
         with pytest.raises(ValidationError):
             ListUserParameters(select=select)
 
@@ -120,44 +114,29 @@ class TestUsersResource:
 
     @pytest.fixture
     def user(self):
-        user = User(
-            Id=123,
-            FirstName="TestFirstName",
-            LastName="TestLastName",
-            Number="123"
-        )
+        user = User(Id=123, FirstName="TestFirstName", LastName="TestLastName", Number="123")
         yield user
 
     @pytest.fixture
     def user2(self):
-        user = User(
-            Id=456,
-            FirstName="TestFirstName2",
-            LastName="TestLastName2",
-            Number="456"
-        )
+        user = User(Id=456, FirstName="TestFirstName2", LastName="TestLastName2", Number="456")
         yield user
 
     def test_endpoint(self, users_resource):
         assert users_resource.endpoint == "Users"
 
     def test_create_user_success(self, users_resource):
-        user_dict = {
-            "Id": 123,
-            "FirstName": "TestFirstName",
-            "LastName": "TestLastName",
-            "Number": "123"
-        }
+        user_dict = {"Id": 123, "FirstName": "TestFirstName", "LastName": "TestLastName", "Number": "123"}
         users_resource.create_user(user_dict)
         users_resource.api.post.assert_called_once_with(users_resource.endpoint, user_dict)
 
-    def test_create_user_failure(self, users_resource, user, http_error): 
+    def test_create_user_failure(self, users_resource, user, http_error):
         users_resource.api.post.side_effect = http_error
         user_dict = user.model_dump()
 
         with pytest.raises(UserCreateError) as context:
             users_resource.create_user(user_dict)
-        assert context.value.args[0] == 'Unable to create user with number 123.'
+        assert context.value.args[0] == "Unable to create user with number 123."
 
     def test_list_user_with_single_result(self, mock_list_user_parameters, users_resource, user):
         api_response = {"value": [user.model_dump()]}
@@ -208,9 +187,7 @@ class TestUsersResource:
         params = ListUserParameters()
         returned_user = users_resource.get_user(user_id=user.Id, params=params)
 
-        users_resource.api.get.assert_called_once_with(
-            endpoint=f"Users({user.Id})", params=params
-        )
+        users_resource.api.get.assert_called_once_with(endpoint=f"Users({user.Id})", params=params)
         assert isinstance(user, User)
         assert returned_user.FirstName == user.FirstName
         assert returned_user.LastName == user.LastName
@@ -222,17 +199,15 @@ class TestUsersResource:
         with pytest.raises(UserGetError):
             users_resource.get_user(user_id=5000, params=params)
 
-        users_resource.api.get.assert_called_once_with(
-            endpoint="Users(5000)", params=params
-        )
+        users_resource.api.get.assert_called_once_with(endpoint="Users(5000)", params=params)
 
     def test_update_user_success(self, users_resource, user):
         user_dict = user.model_dump(
-                exclude_unset=True,
-                exclude_none=True,
-                serialize_as_any=True,
-                by_alias=True,
-            )
+            exclude_unset=True,
+            exclude_none=True,
+            serialize_as_any=True,
+            by_alias=True,
+        )
         mock_user = MagicMock(wraps=user)
         mock_user.model_dump.return_value = user_dict
         mock_user.Id = user.Id
@@ -240,10 +215,8 @@ class TestUsersResource:
         users_resource.update_user(mock_user)
 
         mock_user.model_dump.assert_called_once_with(
-            exclude_unset=True,
-            exclude_none=True,
-            serialize_as_any=True,
-            by_alias=True)
+            exclude_unset=True, exclude_none=True, serialize_as_any=True, by_alias=True
+        )
         users_resource.api.patch.assert_called_once_with(endpoint=f"Users({user.Id})", data=user_dict)
 
     def test_update_user_failure(self, users_resource, user, http_error):
@@ -276,7 +249,9 @@ class TestUsersResource:
 
     @patch.object(UsersResource, "list_user")
     @patch("threecxapi.resources.users.ListUserParameters")
-    def test_get_hotdesks_by_assigned_user_number_no_results(self, mock_params_class, mock_list_user, users_resource, user):
+    def test_get_hotdesks_by_assigned_user_number_no_results(
+        self, mock_params_class, mock_list_user, users_resource, user
+    ):
         expected_results = []
         mock_list_user.return_value = expected_results
         mock_params = MagicMock()
@@ -298,7 +273,7 @@ class TestUsersResource:
     def test_clear_hotdesk_assignment(self, users_resource, user):
         users_resource.clear_hotdesk_assignment(user)
 
-        users_resource.api.patch.assert_called_once_with(endpoint="Users(123)", data={'HotdeskingAssignment': ''})
+        users_resource.api.patch.assert_called_once_with(endpoint="Users(123)", data={"HotdeskingAssignment": ""})
 
     def test_clear_hotdesk_assignment_failure(self, users_resource, user, http_error):
         users_resource.api.patch.side_effect = http_error
@@ -307,10 +282,7 @@ class TestUsersResource:
 
     @pytest.mark.parametrize("value", [True, False])
     def test_has_duplicated_email(self, value, mock_response, users_resource, user):
-        response = {
-                "@odata.context": "https://owensboro.my3cx.us:5001/xapi/v1/$metadata#Edm.Boolean",
-                "value": value
-            }
+        response = {"@odata.context": "https://owensboro.my3cx.us:5001/xapi/v1/$metadata#Edm.Boolean", "value": value}
         users_resource.api.get.return_value = mock_response
         mock_response.json.return_value = response
         result = users_resource.has_duplicated_email(user)

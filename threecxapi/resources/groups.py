@@ -51,18 +51,18 @@ class ListGroupRightsParameters(
 class GroupsResource(APIResource):
     endpoint: str = "Groups"
 
-    def create_group(self, group: Group):
+    def create_group(self, group: dict):
         """Add new entity to Groups"""
         try:
             self.api.post(self.get_endpoint(), group)
         except requests.HTTPError as e:
-            raise GroupCreateError(e)
+            raise GroupCreateError(e, group)
 
     def list_group(self, params: ListGroupParameters) -> list[Group]:
         """Get entities from Groups"""
         try:
             response = self.api.get(self.get_endpoint(), params)
-            return TypeAdapter(list[GroupCollectionResponse]).validate_python(response.json())
+            return TypeAdapter(GroupCollectionResponse).validate_python(response.json())
         except requests.HTTPError as e:
             raise GroupListError(e)
 

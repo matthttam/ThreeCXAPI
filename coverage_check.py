@@ -1,9 +1,15 @@
 import re
 import yaml
+from enum import Enum, auto
 from collections import defaultdict
 from pathlib import Path
 
 # This is meant to check what endpoint actions are currently implemented in resources
+
+
+class status(Enum):
+    implemented = auto()
+    not_implemented = auto()
 
 
 # Helper function to convert camelCase or PascalCase to snake_case
@@ -42,23 +48,21 @@ def check_implementation(operations: dict, resources_path: str):
         return re.split(r"[/(]", path.lstrip("/"), maxsplit=1)[0]
 
     # Iterate through all resource files
+    all_content = ""
+    content = []
+
     for resource_file in Path(resources_path).glob("*.py"):
         with open(resource_file, "r") as file:
-            content = file.read()
+            content.append(file.read())
+    all_content = str.join(" ", content)
 
-        for operation_id in list(operations.keys()):
-            snake_case_method = to_snake_case(operation_id)
-            endpoint_key = get_endpoint_key(operations[operation_id]["endpoint"])
-            implemented_or_not = "not_implemented"
-            if re.search(rf"def {re.escape(snake_case_method)}\(.*?\):", content):
-                implemented_or_not = "implemented"
-
-            results[endpoint_key][implemented_or_not].append(operation_id)
-
-            # del operations[operation_id]
-
-    # Remaining operationIds are not implemented
-    # results["not_implemented"] = list(operations.keys())
+    for operation_id in list(operations.keys()):
+        snake_case_method = to_snake_case(operation_id)
+        endpoint_key = get_endpoint_key(operations[operation_id]["endpoint"])
+        implementation_status = status.not_implemented
+        if re.search(rf"def {re.escape(snake_case_method)}\(.*?\).*?:", all_content):
+            implementation_status = status.implemented
+        results[endpoint_key][implementation_status].append(operation_id)
 
     return results
 
@@ -71,10 +75,11 @@ if __name__ == "__main__":
     operations = parse_swagger(swagger_file_path)
     results = check_implementation(operations, api_resources_path)
 
-    print("\nImplemented Methods:")
-    for implemented in results["implemented"]:
-        print(f"- {implemented}")
-
-    print("\nNot Implemented Methods:")
-    for not_implemented in results["not_implemented"]:
-        print(f"- {not_implemented}")
+    for endpoint, methods in results.items():
+        print(f"\nEndpoint: {endpoint}")
+        print("Implemented Methods:")
+        for implemented in methods[status.implemented]:
+            print(f"- {implemented}")
+        print("\nNot Implemented Methods:")
+        for not_implemented in methods[status.not_implemented]:
+            print(f"- {not_implemented}")

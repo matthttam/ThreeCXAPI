@@ -3,316 +3,224 @@ import pytest
 from pydantic import ValidationError
 from unittest.mock import patch, MagicMock
 from threecxapi.components.responses.other import HasDuplicatedEmailResponse
-from threecxapi.components.responses.pbx import UserCollectionResponse
-from threecxapi.resources.exceptions.users_exceptions import (
-    UserCreateError,
-    UserListError,
-    UserDeleteError,
-    UserGetError,
-    UserHotdeskLogoutError,
-    UserHotdeskLookupError,
-    UserUpdateError
+from threecxapi.components.responses.pbx import GroupCollectionResponse
+from threecxapi.resources.exceptions.groups_exceptions import (
+    GroupCreateError,
+    GroupListError,
+    GroupDeleteError,
+    GroupGetError,
+    GroupUpdateError,
 )
-from threecxapi.resources.users import ListUserParameters, UserProperties
+from threecxapi.resources.groups import ListGroupParameters
 from threecxapi.components.parameters import ListParameters
-from threecxapi.resources.users import UsersResource
+from threecxapi.resources.groups import GroupsResource
 from threecxapi.tcx_api_connection import ThreeCXApiConnection
-from threecxapi.components.schemas.pbx import User
+from threecxapi.components.schemas.pbx import Group
 
 
 @pytest.fixture
-def user_error():
-    return {
-                "error": {
-                    "code": "",
-                    "message": "SAMPLE_FIELD:\nWARNINGS.XAPI.SAMPLE_ERROR",
-                    "details": [
-                        {
-                            "code": "",
-                            "message": "WARNINGS.XAPI.SAMPLE_ERROR",
-                            "target": "SAMPLE_FIELD"
-                        }
-                    ]
-                }
-            }
-
-
-@pytest.fixture
-def mock_response(user_error):
+def mock_response(group_error):
     mock_response = MagicMock(spec=requests.models.Response)
     mock_response.status_code = 418
-    mock_response.json.return_value = user_error
+    mock_response.json.return_value = group_error
     yield mock_response
+
 
 @pytest.fixture
 def http_error(mock_response):
     yield requests.HTTPError("An Error Occured", response=mock_response)
 
-class TestListUserParameters:
+
+class TestListGroupParameters:
 
     def test_inherits_from_parameters(self):
-        assert issubclass(ListUserParameters, ListParameters)
+        assert issubclass(ListGroupParameters, ListParameters)
 
     def test_valid_empty_parameters(self):
-        test_list_user_parameters = ListUserParameters()
-        assert isinstance(test_list_user_parameters, ListUserParameters)
+        test_list_group_parameters = ListGroupParameters()
+        assert isinstance(test_list_group_parameters, ListGroupParameters)
 
     def test_valid_select(self):
-        select = list(UserProperties)
-        params = ListUserParameters(select=select)
-        assert isinstance(params, ListUserParameters)
+        params = ListGroupParameters(select=Group.to_enum())
+        assert isinstance(params, ListGroupParameters)
 
     def test_invalid_select(self):
-        select = list(UserProperties)
-        select.append("INVALID_VALUE")
+        select = ["INVALID_VALUE"]
         with pytest.raises(ValidationError):
-            ListUserParameters(select=select)
+            ListGroupParameters(select=select)
 
     def test_valid_expand(self):
         expand = "test"
-        params = ListUserParameters(expand=expand)
-        assert isinstance(params, ListUserParameters)
+        params = ListGroupParameters(expand=expand)
+        assert isinstance(params, ListGroupParameters)
 
     def test_invalid_expand(self):
         expand = 3
         with pytest.raises(ValidationError):
-            ListUserParameters(expand=expand)
+            ListGroupParameters(expand=expand)
 
     def test_valid_top(self):
-        test_params = ListUserParameters(top=1, skip=1)
+        test_params = ListGroupParameters(top=1, skip=1)
         assert test_params.top == 1
 
     def test_invalid_top(self):
         with pytest.raises(ValidationError):
-            test_params = ListUserParameters(top=-1)
+            test_params = ListGroupParameters(top=-1)
 
-        test_params = ListUserParameters(top=1)
+        test_params = ListGroupParameters(top=1)
         with pytest.raises(ValidationError):
             test_params.top = -1
 
     def test_valid_skip(self):
-        test_params = ListUserParameters(skip=1)
+        test_params = ListGroupParameters(skip=1)
         assert test_params.skip == 1
 
     def test_invalid_skip(self):
         with pytest.raises(ValidationError):
-            test_params = ListUserParameters(skip=-1)
+            test_params = ListGroupParameters(skip=-1)
 
-        test_params = ListUserParameters(skip=1)
+        test_params = ListGroupParameters(skip=1)
         with pytest.raises(ValidationError):
             test_params.skip = -1
 
 
-class TestUsersResource:
+class TestGroupsResource:
     @pytest.fixture
     def mock_tcx_api_connection(self):
         return MagicMock(spec=ThreeCXApiConnection)
 
     @pytest.fixture
-    def mock_list_user_parameters(self):
-        return MagicMock(spec=ListUserParameters)
+    def mock_list_group_parameters(self):
+        return MagicMock(spec=ListGroupParameters)
 
     @pytest.fixture
-    def users_resource(self, mock_tcx_api_connection):
-        return UsersResource(api=mock_tcx_api_connection)
+    def groups_resource(self, mock_tcx_api_connection):
+        return GroupsResource(api=mock_tcx_api_connection)
 
     @pytest.fixture
-    def user(self):
-        user = User(
-            Id=123,
-            FirstName="TestFirstName",
-            LastName="TestLastName",
-            Number="123"
-        )
-        yield user
+    def group(self):
+        group = Group(Id=123, Name="TestGroup", Number="123")
+        yield group
 
     @pytest.fixture
-    def user2(self):
-        user = User(
-            Id=456,
-            FirstName="TestFirstName2",
-            LastName="TestLastName2",
-            Number="456"
-        )
-        yield user
+    def group2(self):
+        group = Group(Id=456, Name="TestGroup2", Number="456")
+        yield group
 
-    def test_endpoint(self, users_resource):
-        assert users_resource.endpoint == "Users"
+    def test_endpoint(self, groups_resource):
+        assert groups_resource.endpoint == "Groups"
 
-    def test_create_user_success(self, users_resource):
-        user_dict = {
-            "Id": 123,
-            "FirstName": "TestFirstName",
-            "LastName": "TestLastName",
-            "Number": "123"
-        }
-        users_resource.create_user(user_dict)
-        users_resource.api.post.assert_called_once_with(users_resource.endpoint, user_dict)
+    def test_create_group_success(self, groups_resource):
+        group_dict = {"Id": 123, "FirstName": "TestFirstName", "LastName": "TestLastName", "Number": "123"}
+        groups_resource.create_group(group_dict)
+        groups_resource.api.post.assert_called_once_with(groups_resource.endpoint, group_dict)
 
-    def test_create_user_failure(self, users_resource, user, http_error): 
-        users_resource.api.post.side_effect = http_error
-        user_dict = user.model_dump()
+    def test_create_group_failure(self, groups_resource, group, http_error):
+        groups_resource.api.post.side_effect = http_error
+        group_dict = group.model_dump()
 
-        with pytest.raises(UserCreateError) as context:
-            users_resource.create_user(user_dict)
-        assert context.value.args[0] == 'Unable to create user with number 123.'
+        with pytest.raises(GroupCreateError) as context:
+            groups_resource.create_group(group_dict)
+        assert context.value.args[0] == "Unable to create group with number 123."
 
-    def test_list_user_with_single_result(self, mock_list_user_parameters, users_resource, user):
-        api_response = {"value": [user.model_dump()]}
-        users_resource.api.get.return_value = MagicMock(json=MagicMock(return_value=api_response))
-        expected_user = User.model_construct(**user.model_dump())
+    def test_list_group_with_single_result(self, mock_list_group_parameters, groups_resource, group):
+        api_response = {"value": [group.model_dump()]}
+        groups_resource.api.get.return_value = MagicMock(json=MagicMock(return_value=api_response))
+        expected_group = Group.model_construct(**group.model_dump())
 
-        user_collection_response = users_resource.list_user(mock_list_user_parameters)
-        users = user_collection_response.value
+        group_collection_response = groups_resource.list_group(mock_list_group_parameters)
+        groups = group_collection_response.value
 
-        assert isinstance(user_collection_response, UserCollectionResponse)
-        assert len(users) == 1
-        assert users[0].model_dump() == expected_user.model_dump()
-        users_resource.api.get.assert_called_once_with("Users", mock_list_user_parameters)
+        assert isinstance(group_collection_response, GroupCollectionResponse)
+        assert len(groups) == 1
+        assert groups[0].model_dump() == expected_group.model_dump()
+        groups_resource.api.get.assert_called_once_with("Groups", mock_list_group_parameters)
 
-    def test_list_user_with_multiple_results(self, mock_list_user_parameters, users_resource, user, user2):
-        api_response = {"value": [user.model_dump(), user2.model_dump()]}
-        users_resource.api.get.return_value = MagicMock(json=MagicMock(return_value=api_response))
+    def test_list_group_with_multiple_results(self, mock_list_group_parameters, groups_resource, group, group2):
+        api_response = {"value": [group.model_dump(), group2.model_dump()]}
+        groups_resource.api.get.return_value = MagicMock(json=MagicMock(return_value=api_response))
 
-        params = ListUserParameters()
-        user_collection_response = users_resource.list_user(params)
-        users = user_collection_response.value
+        params = ListGroupParameters()
+        group_collection_response = groups_resource.list_group(params)
+        groups = group_collection_response.value
 
-        assert isinstance(user_collection_response, UserCollectionResponse)
-        assert len(users) == 2
-        assert users[1].Id == user2.Id
-        assert users[1].FirstName == user2.FirstName
-        assert users[1].LastName == user2.LastName
+        assert isinstance(group_collection_response, GroupCollectionResponse)
+        assert len(groups) == 2
+        assert groups[1].Id == group2.Id
+        assert groups[1].Name == group2.Name
+        assert groups[1].Number == group2.Number
 
         # Asserting that the API was called with the correct parameters
-        users_resource.api.get.assert_called_once_with("Users", params)
+        groups_resource.api.get.assert_called_once_with("Groups", params)
 
-    def test_list_user_failure(self, users_resource, http_error):
+    def test_list_group_failure(self, groups_resource, http_error):
         # Mocking the API response to simulate an error
-        users_resource.api.get.side_effect = http_error
+        groups_resource.api.get.side_effect = http_error
 
         # Calling the method under test
-        params = ListUserParameters()
-        with pytest.raises(UserListError):
-            users_resource.list_user(params)
+        params = ListGroupParameters()
+        with pytest.raises(GroupListError):
+            groups_resource.list_group(params)
 
         # Asserting that the API was called with the correct parameters
-        users_resource.api.get.assert_called_once_with("Users", params)
+        groups_resource.api.get.assert_called_once_with("Groups", params)
 
-    def test_get_user_success(self, users_resource, user, mock_response):
-        mock_response.json.return_value = user.model_dump()
-        users_resource.api.get.return_value = mock_response
+    def test_get_group_success(self, groups_resource, group, mock_response):
+        mock_response.json.return_value = group.model_dump()
+        groups_resource.api.get.return_value = mock_response
 
-        params = ListUserParameters()
-        returned_user = users_resource.get_user(user_id=user.Id, params=params)
+        params = ListGroupParameters()
+        returned_group = groups_resource.get_group(group_id=group.Id, params=params)
 
-        users_resource.api.get.assert_called_once_with(
-            endpoint=f"Users({user.Id})", params=params
-        )
-        assert isinstance(user, User)
-        assert returned_user.FirstName == user.FirstName
-        assert returned_user.LastName == user.LastName
+        groups_resource.api.get.assert_called_once_with(endpoint=f"Groups({group.Id})", params=params)
+        assert isinstance(group, Group)
+        assert returned_group.Id == group.Id
+        assert returned_group.Name == group.Name
+        assert returned_group.Number == group.Number
 
-    def test_get_user_failure(self, users_resource, http_error):
-        users_resource.api.get.side_effect = http_error
+    def test_get_group_failure(self, groups_resource, http_error):
+        groups_resource.api.get.side_effect = http_error
 
-        params = ListUserParameters()
-        with pytest.raises(UserGetError):
-            users_resource.get_user(user_id=5000, params=params)
+        params = ListGroupParameters()
+        with pytest.raises(GroupGetError):
+            groups_resource.get_group(group_id=5000, params=params)
 
-        users_resource.api.get.assert_called_once_with(
-            endpoint="Users(5000)", params=params
-        )
+        groups_resource.api.get.assert_called_once_with(endpoint="Groups(5000)", params=params)
 
-    def test_update_user_success(self, users_resource, user):
-        user_dict = user.model_dump(
-                exclude_unset=True,
-                exclude_none=True,
-                serialize_as_any=True,
-                by_alias=True,
-            )
-        mock_user = MagicMock(wraps=user)
-        mock_user.model_dump.return_value = user_dict
-        mock_user.Id = user.Id
-
-        users_resource.update_user(mock_user)
-
-        mock_user.model_dump.assert_called_once_with(
+    def test_update_group_success(self, groups_resource, group):
+        group_dict = group.model_dump(
             exclude_unset=True,
             exclude_none=True,
             serialize_as_any=True,
-            by_alias=True)
-        users_resource.api.patch.assert_called_once_with(endpoint=f"Users({user.Id})", data=user_dict)
+            by_alias=True,
+        )
+        mock_group = MagicMock(wraps=group)
+        mock_group.model_dump.return_value = group_dict
+        mock_group.Id = group.Id
 
-    def test_update_user_failure(self, users_resource, user, http_error):
-        users_resource.api.patch.side_effect = http_error
-        with pytest.raises(UserUpdateError):
-            users_resource.update_user(user)
+        groups_resource.update_group(mock_group)
 
-    def test_delete_user(self, users_resource, user):
-        users_resource.delete_user(user)
-        users_resource.api.delete.assert_called_once_with(endpoint="Users", params=user.Id)
+        mock_group.model_dump.assert_called_once_with(
+            exclude_unset=True, exclude_none=True, serialize_as_any=True, by_alias=True
+        )
+        groups_resource.api.patch.assert_called_once_with(endpoint=f"Groups({group.Id})", data=group_dict)
 
-    def test_delete_user_failure(self, users_resource, user, http_error):
-        users_resource.api.delete.side_effect = http_error
-        with pytest.raises(UserDeleteError):
-            users_resource.delete_user(user)
+    def test_update_group_failure(self, groups_resource, group, http_error):
+        groups_resource.api.patch.side_effect = http_error
+        with pytest.raises(GroupUpdateError):
+            groups_resource.update_group(group)
 
-    @patch.object(UsersResource, "list_user")
-    @patch("threecxapi.resources.users.ListUserParameters")
-    def test_get_hotdesks_by_assigned_user_number(self, mock_params_class, mock_list_user, users_resource, user):
-        expected_results = [user, user, user, user]
-        mock_list_user.return_value = expected_results
-        mock_params = MagicMock()
-        mock_params_class.return_value = mock_params
+    def test_delete_group(self, groups_resource, group):
+        groups_resource.delete_group(group)
+        groups_resource.api.delete.assert_called_once_with(endpoint="Groups", params=group.Id)
 
-        hotdesk_users = users_resource.get_hotdesks_by_assigned_user_number("123")
+    def test_delete_group_failure(self, groups_resource, group, http_error):
+        groups_resource.api.delete.side_effect = http_error
+        with pytest.raises(GroupDeleteError):
+            groups_resource.delete_group(group)
 
-        mock_params_class.assert_called_once_with(filter="HotdeskingAssignment eq '123'")
-        users_resource.list_user.assert_called_once_with(params=mock_params)
-        assert hotdesk_users == expected_results
-
-    @patch.object(UsersResource, "list_user")
-    @patch("threecxapi.resources.users.ListUserParameters")
-    def test_get_hotdesks_by_assigned_user_number_no_results(self, mock_params_class, mock_list_user, users_resource, user):
-        expected_results = []
-        mock_list_user.return_value = expected_results
-        mock_params = MagicMock()
-        mock_params_class.return_value = mock_params
-
-        hotdesk_users = users_resource.get_hotdesks_by_assigned_user_number("123")
-
-        mock_params_class.assert_called_once_with(filter="HotdeskingAssignment eq '123'")
-        users_resource.list_user.assert_called_once_with(params=mock_params)
-        assert hotdesk_users is None
-
-    @patch.object(UsersResource, "list_user")
-    def test_get_hotdesks_by_assigned_user_number_failure(self, mock_list_user, users_resource, user, http_error):
-        mock_list_user.side_effect = http_error
-
-        with pytest.raises(UserHotdeskLookupError):
-            users_resource.get_hotdesks_by_assigned_user_number("123")
-
-    def test_clear_hotdesk_assignment(self, users_resource, user):
-        users_resource.clear_hotdesk_assignment(user)
-
-        users_resource.api.patch.assert_called_once_with(endpoint="Users(123)", data={'HotdeskingAssignment': ''})
-
-    @pytest.mark.parametrize("value", [True, False])
-    def test_has_duplicated_email(self, value, mock_response, users_resource, user):
-        response = {
-                "@odata.context": "https://owensboro.my3cx.us:5001/xapi/v1/$metadata#Edm.Boolean",
-                "value": value
-            }
-        users_resource.api.get.return_value = mock_response
-        mock_response.json.return_value = response
-        result = users_resource.has_duplicated_email(user)
-
-        assert isinstance(result, HasDuplicatedEmailResponse)
-        assert result.value == value
-
-    def test_get_new_user(self):
+    def test_get_new_group(self):
         # Technically since there is no endpoint that returns a framework or default
-        # setup for a new user, this is business logic and doesn't belong in this extension.
+        # setup for a new group, this is business logic and doesn't belong in this extension.
         # This will be removed later.
         pytest.skip()
