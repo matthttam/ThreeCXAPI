@@ -1,10 +1,11 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "threecxapi"
 authors = [{ name = "Matt Henry", email = "matthttam8411@gmail.com" }]
+description = "This is a python wrapper for the 3CX API. It is designed to make it easier to interact with the 3CX API. It is a work in progress and is not yet feature complete. It is designed to be used with the official 3CX v20 API."
 readme = "README.md"
 requires-python = ">=3.12"
 license = { file = "LICENSE" }
@@ -12,14 +13,10 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
 ]
-dynamic = ["version", "description"]
-description-file = "README.md"
+dynamic = ["version"]
 
 [project.urls]
 Home = "https://github.com/matthttam/ThreeCXAPI"
-
-[project.requires-extra]
-test = ["pytest", "pytest-cov", "tox"]
 
 [tool.pytest.ini_options]
 addopts = [
@@ -34,3 +31,6 @@ pythonpath = "."
 
 [tool.black]
 line-length = 120
+
+[tool.setuptools_scm]
+write_to = "threecxapi/_version.py"  # Optional: Writes the version to a file for runtime use
