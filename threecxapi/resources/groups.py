@@ -58,7 +58,7 @@ class GroupsResource(APIResource):
         except requests.HTTPError as e:
             raise GroupCreateError(e, group)
 
-    def list_group(self, params: ListGroupParameters) -> list[Group]:
+    def list_group(self, params: ListGroupParameters) -> GroupCollectionResponse:
         """Get entities from Groups"""
         try:
             response = self.api.get(self.get_endpoint(), params)
@@ -117,7 +117,7 @@ class GroupsResource(APIResource):
         except requests.HTTPError as e:
             raise GroupDeleteCompanyByIdError(e, id)
 
-    def list_members(self, group: Group, params: ListUserGroupParameters):
+    def list_members(self, group: Group, params: ListUserGroupParameters) -> UserGroupCollectionResponse:
         """Get members of a group"""
         try:
             response = self.api.get(self.get_endpoint(group.Id, "Members"), params)
@@ -125,7 +125,7 @@ class GroupsResource(APIResource):
         except requests.HTTPError as e:
             raise GroupListMembersError(e)
 
-    def list_rights(self, group: Group, params: ListGroupRightsParameters):
+    def list_rights(self, group: Group, params: ListGroupRightsParameters) -> UserGroupCollectionResponse:
         """Get rights of a group"""
         try:
             response = self.api.get(self.get_endpoint(group.Id, "Members"), params)

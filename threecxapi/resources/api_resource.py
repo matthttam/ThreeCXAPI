@@ -1,6 +1,6 @@
 from abc import ABC
 from pydantic import BaseModel, ConfigDict
-from threecxapi.tcx_api_connection import ThreeCXApiConnection
+from threecxapi.connection import ThreeCXApiConnection
 
 
 class APIResource(BaseModel, ABC):

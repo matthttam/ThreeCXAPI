@@ -14,7 +14,7 @@ from threecxapi.resources.exceptions.groups_exceptions import (
 from threecxapi.resources.groups import ListGroupParameters
 from threecxapi.components.parameters import ListParameters
 from threecxapi.resources.groups import GroupsResource
-from threecxapi.tcx_api_connection import ThreeCXApiConnection
+from threecxapi.connection import ThreeCXApiConnection
 from threecxapi.components.schemas.pbx import Group
 
 
@@ -86,7 +86,7 @@ class TestListGroupParameters:
 
 class TestGroupsResource:
     @pytest.fixture
-    def mock_tcx_api_connection(self):
+    def mock_connection(self):
         return MagicMock(spec=ThreeCXApiConnection)
 
     @pytest.fixture
@@ -94,8 +94,8 @@ class TestGroupsResource:
         return MagicMock(spec=ListGroupParameters)
 
     @pytest.fixture
-    def groups_resource(self, mock_tcx_api_connection):
-        return GroupsResource(api=mock_tcx_api_connection)
+    def groups_resource(self, mock_connection):
+        return GroupsResource(api=mock_connection)
 
     @pytest.fixture
     def group(self):

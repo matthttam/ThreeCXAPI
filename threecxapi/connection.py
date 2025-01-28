@@ -3,7 +3,6 @@ import time
 
 from typing import NamedTuple, Optional
 
-from threecxapi.api import API
 from threecxapi.exceptions import APIAuthenticationError, APIAuthenticationTokenRefreshError
 from threecxapi.components.parameters import QueryParameters
 
@@ -15,7 +14,7 @@ class AuthenticationToken(NamedTuple):
     refresh_token: str
 
 
-class ThreeCXApiConnection(API):
+class ThreeCXApiConnection:
     default_headers = {"Content-type": "application/json", "Accept": "application/json"}
 
     def __init__(self, *args, server_url, api_path="/xapi/v1", **kwargs):

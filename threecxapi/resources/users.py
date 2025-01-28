@@ -68,7 +68,7 @@ class UsersResource(APIResource):
         except requests.HTTPError as e:
             raise UserCreateError(e, user)
 
-    def list_user(self, params: ListUserParameters) -> list[User]:
+    def list_user(self, params: ListUserParameters) -> UserCollectionResponse:
         """
         Retrieves a list of users by sending a GET request to the Users endpoint.
 

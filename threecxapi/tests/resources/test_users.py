@@ -17,7 +17,7 @@ from threecxapi.resources.exceptions.users_exceptions import (
 from threecxapi.resources.users import ListUserParameters
 from threecxapi.components.parameters import ListParameters
 from threecxapi.resources.users import UsersResource
-from threecxapi.tcx_api_connection import ThreeCXApiConnection
+from threecxapi.connection import ThreeCXApiConnection
 from threecxapi.components.schemas.pbx import User
 import threecxapi.exceptions as TCX_Exceptions
 
@@ -101,7 +101,7 @@ class TestListUserParameters:
 
 class TestUsersResource:
     @pytest.fixture
-    def mock_tcx_api_connection(self):
+    def mock_connection(self):
         return MagicMock(spec=ThreeCXApiConnection)
 
     @pytest.fixture
@@ -109,8 +109,8 @@ class TestUsersResource:
         return MagicMock(spec=ListUserParameters)
 
     @pytest.fixture
-    def users_resource(self, mock_tcx_api_connection):
-        return UsersResource(api=mock_tcx_api_connection)
+    def users_resource(self, mock_connection):
+        return UsersResource(api=mock_connection)
 
     @pytest.fixture
     def user(self):
