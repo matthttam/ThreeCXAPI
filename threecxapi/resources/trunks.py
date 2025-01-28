@@ -1,16 +1,15 @@
 import requests
 from pydantic import TypeAdapter
 from typing import List
-from resources.api_resource import APIResource
-from util import create_enum_from_model
-from components.schemas.pbx import Trunk, XTelegramAuth
-from components.parameters import (
+from threecxapi.resources.api_resource import APIResource
+from threecxapi.components.schemas.pbx import Trunk, XTelegramAuth
+from threecxapi.components.parameters import (
     ExpandParameters,
     ListParameters,
     OrderbyParameters,
     SelectParameters,
 )
-from resources.exceptions.trunks_exceptions import (
+from threecxapi.resources.exceptions.trunks_exceptions import (
     TrunkCreateError,
     TrunkListError,
     TrunkGetError,
@@ -23,15 +22,11 @@ from resources.exceptions.trunks_exceptions import (
     CallTelegramSessionError,
 )
 
-TrunkProperties = create_enum_from_model(Trunk)
+
+class ListTrunkParameters(ListParameters, OrderbyParameters, SelectParameters[Trunk.to_enum()], ExpandParameters): ...
 
 
-class ListTrunkParameters(ListParameters, OrderbyParameters, SelectParameters[TrunkProperties], ExpandParameters):
-    ...
-
-
-class GetTrunkParameters(SelectParameters[TrunkProperties], ExpandParameters):
-    ...
+class GetTrunkParameters(SelectParameters[Trunk.to_enum()], ExpandParameters): ...
 
 
 class TrunksResource(APIResource):
@@ -221,37 +216,29 @@ class TrunksResource(APIResource):
         Args:
             number:
         """
-        try:           
-            response = self.api.get(
-                endpoint=self.get_endpoint(action=f"Pbx.GetTrunkByNumber(number='{number}')")
-            )
+        try:
+            response = self.api.get(endpoint=self.get_endpoint(action=f"Pbx.GetTrunkByNumber(number='{number}')"))
             return TypeAdapter(Trunk).validate_python(response.json())
         except requests.HTTPError as e:
             raise TrunkGetByNumberError(e, number)
 
-    def initialize_trunk(self, template='Callcentric.pv.xml'):
+    def initialize_trunk(self, template="Callcentric.pv.xml"):
         try:
-            response = self.api.get(
-                endpoint=self.get_endpoint(action=f"Pbx.InitTrunk(template='{template}')")
-            )
+            response = self.api.get(endpoint=self.get_endpoint(action=f"Pbx.InitTrunk(template='{template}')"))
             return TypeAdapter(Trunk).validate_python(response.json())
         except requests.HTTPError as e:
             raise TrunkInitializeError(e, template)
 
     def initialize_master_bridge(self):
         try:
-            response = self.api.get(
-                endpoint=self.get_endpoint(action="Pbx.InitMasterBridge")
-            )
+            response = self.api.get(endpoint=self.get_endpoint(action="Pbx.InitMasterBridge"))
             return TypeAdapter(Trunk).validate_python(response.json())
         except requests.HTTPError as e:
             raise MasterBridgeInitializeError(e)
 
     def initialize_slave_brdige(self):
         try:
-            response = self.api.get(
-                endpoint=self.get_endpoint(action="Pbx.InitSlaveBridge")
-            )
+            response = self.api.get(endpoint=self.get_endpoint(action="Pbx.InitSlaveBridge"))
             return TypeAdapter(Trunk).validate_python(response.json())
         except requests.HTTPError as e:
             raise SlaveBridgeInitializeError(e)

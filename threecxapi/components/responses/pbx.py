@@ -1,6 +1,6 @@
-from components.response import Response
+from threecxapi.components.response import Response
 from pydantic import Field
-from components.schemas.pbx import (
+from threecxapi.components.schemas.pbx import (
     Receptionist,
     BlackListNumber,
     BlocklistAddr,
@@ -240,8 +240,7 @@ class RingGroupStatisticsCollectionResponse(Response):
 
 
 class ExtensionsStatisticsByRingGroupsCollectionResponse(Response):
-    value: list[ExtensionsStatisticsByRingGroups] = Field(
-        default_factory=list)
+    value: list[ExtensionsStatisticsByRingGroups] = Field(default_factory=list)
 
 
 class CallLogDataCollectionResponse(Response):
@@ -257,8 +256,7 @@ class ExtensionStatisticsCollectionResponse(Response):
 
 
 class ReportExtensionStatisticsByGroupCollectionResponse(Response):
-    value: list[ReportExtensionStatisticsByGroup] = Field(
-        default_factory=list)
+    value: list[ReportExtensionStatisticsByGroup] = Field(default_factory=list)
 
 
 class CallCostByExtensionGroupCollectionResponse(Response):
@@ -322,8 +320,7 @@ class QueueAgentsChatStatisticsCollectionResponse(Response):
 
 
 class QueueAgentsChatStatisticsTotalsCollectionResponse(Response):
-    value: list[QueueAgentsChatStatisticsTotals] = Field(
-        default_factory=list)
+    value: list[QueueAgentsChatStatisticsTotals] = Field(default_factory=list)
 
 
 class AbandonedChatsStatisticsCollectionResponse(Response):

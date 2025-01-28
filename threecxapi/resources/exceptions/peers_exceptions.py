@@ -1,6 +1,6 @@
-from exceptions import APIError
+from threecxapi.exceptions import APIError
 from requests import HTTPError
-from components.schemas.pbx import Peer
+from threecxapi.components.schemas.pbx import Peer
 
 
 class PeerCreateError(APIError):
@@ -33,9 +33,7 @@ class PeerUpdateError(APIError):
     def __init__(self, e: HTTPError, peer: Peer):
         peer_id = peer.Id
         peer_number = getattr(peer, "Number", "N/A")
-        error_message = (
-            f"Unable to update peer with ID {peer_id} and number {peer_number}."
-        )
+        error_message = f"Unable to update peer with ID {peer_id} and number {peer_number}."
         super().__init__(e, error_message)
 
 

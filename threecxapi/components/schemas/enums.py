@@ -1,4 +1,4 @@
-from util import TcxStrEnum
+from threecxapi.util import TcxStrEnum
 from enum import auto
 
 

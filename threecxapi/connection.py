@@ -3,9 +3,8 @@ import time
 
 from typing import NamedTuple, Optional
 
-from exceptions import APIAuthenticationError
-from api import API
-from components.parameters import QueryParameters
+from threecxapi.exceptions import APIAuthenticationError, APIAuthenticationTokenRefreshError
+from threecxapi.components.parameters import QueryParameters
 
 
 class AuthenticationToken(NamedTuple):
@@ -15,8 +14,15 @@ class AuthenticationToken(NamedTuple):
     refresh_token: str
 
 
-class TCX_API_Connection(API):
+class ThreeCXApiConnection:
     default_headers = {"Content-type": "application/json", "Accept": "application/json"}
+
+    def __init__(self, *args, server_url, api_path="/xapi/v1", **kwargs):
+        self.server_url = server_url
+        self.api_path = api_path
+        self.session = requests.Session()
+        self.token_expiry_time = 0
+        self._token = None
 
     @property
     def api_url(self):
@@ -31,21 +37,9 @@ class TCX_API_Connection(API):
         self._token = AuthenticationToken(**token)
         self._update_token_expiry_time(self.token.expires_in)
 
-    def __init__(self, *args, server_url, api_path="/xapi/v1", **kwargs):
-        self.server_url = server_url
-        self.api_path = api_path
-        self.session = requests.Session()
-        self.token_expiry_time = 0
-        self._token = None
-
-    def get_api_endpoint_url(self, endpoint):
-        return self.api_url + "/" + endpoint
-
     def get(self, endpoint: str, params: QueryParameters | None = None) -> requests.Response:
         request_params = params.model_dump(exclude_none=True, by_alias=True) if params else None
-        return self._make_request(
-            "get", endpoint, params=request_params
-        )
+        return self._make_request("get", endpoint, params=request_params)
 
     def post(self, endpoint: str, data: dict) -> requests.Response:
         """
@@ -110,9 +104,14 @@ class TCX_API_Connection(API):
             response.raise_for_status()
         except requests.HTTPError as e:
             raise APIAuthenticationError(e)
-        self.token = response.json().get("Token", {})
+        json_response = response.json()
+        token = json_response.get("Token", {})
+        self.token = token
 
-    def _refresh_access_token(self):
+    def _get_api_endpoint_url(self, endpoint):
+        return self.api_url + "/" + endpoint
+
+    def _refresh_access_token(self) -> None:
         # Get Access Token
         data = {
             "client_id": "Webclient",
@@ -126,7 +125,7 @@ class TCX_API_Connection(API):
             )
             response.raise_for_status()
         except requests.HTTPError as e:
-            raise APIAuthenticationError(e)
+            raise APIAuthenticationTokenRefreshError(original_exception=e)
         self.token = response.json()
 
     def _is_token_expired(self, buffer: Optional[int] = 5) -> bool:
@@ -166,12 +165,10 @@ class TCX_API_Connection(API):
         Raises:
             requests.exceptions.HTTPError: If the HTTP request returned an unsuccessful status code.
         """
-        url = self.get_api_endpoint_url(endpoint)
+        url = self._get_api_endpoint_url(endpoint)
         if self._is_token_expired():
             self._refresh_access_token()
 
-        response = self.session.request(
-            method, url, headers=self._get_headers(), **kwargs
-        )
+        response = self.session.request(method, url, headers=self._get_headers(), **kwargs)
         response.raise_for_status()
         return response

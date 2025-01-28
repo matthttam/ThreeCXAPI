@@ -3,22 +3,19 @@ from typing import List
 
 from pydantic import TypeAdapter
 
-from components.parameters import (
+from threecxapi.components.parameters import (
     ExpandParameters,
     ListParameters,
     OrderbyParameters,
     SelectParameters,
 )
-from resources.api_resource import APIResource
-from components.schemas.pbx import Peer
-from resources.exceptions.peers_exceptions import PeerListError, PeerGetError
-from util import create_enum_from_model
+from threecxapi.resources.api_resource import APIResource
+from threecxapi.components.schemas.pbx import Peer
+from threecxapi.components.responses.pbx import PeerCollectionResponse
+from threecxapi.resources.exceptions.peers_exceptions import PeerListError, PeerGetError
 
 
-PeerProperties = create_enum_from_model(Peer)
-
-class ListPeerParameters(ListParameters, OrderbyParameters, SelectParameters[PeerProperties], ExpandParameters):
-    ...
+class ListPeerParameters(ListParameters, OrderbyParameters, SelectParameters[Peer.to_enum()], ExpandParameters): ...
 
 
 class PeersResource(APIResource):
@@ -27,20 +24,16 @@ class PeersResource(APIResource):
     def get_endpoint(self) -> str:
         return "/Peers"
 
-    def list_peer(self, params: ListPeerParameters) -> List[Peer]:
+    def list_peer(self, params: ListPeerParameters) -> PeerCollectionResponse:
         try:
             response = self.api.get(self.get_endpoint(), params)
-            response_value = response.json().get("value")
-            return TypeAdapter(List[Peer]).validate_python(response_value)
+            return TypeAdapter(PeerCollectionResponse).validate_python(response.json())
         except requests.HTTPError as e:
             raise PeerListError(e)
 
     def get_peer_by_number(self, user_number: str) -> Peer | None:
         try:
-            response = self.api.get(
-                f"{self.get_endpoint()}/Pbx.GetPeerByNumber(number='{user_number}')"
-            )
-            response_value = response.json().get("value")
-            return TypeAdapter(Peer).validate_python(response_value)
+            response = self.api.get(f"{self.get_endpoint()}/Pbx.GetPeerByNumber(number='{user_number}')")
+            return TypeAdapter(Peer).validate_python(response.json())
         except requests.HTTPError as e:
             raise PeerGetError(e, user_number)

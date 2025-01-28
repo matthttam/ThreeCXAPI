@@ -1,6 +1,6 @@
-from exceptions import APIError
+from threecxapi.exceptions import APIError
 from requests import HTTPError
-from components.schemas.pbx import Trunk
+from threecxapi.components.schemas.pbx import Trunk
 
 
 class TrunkCreateError(APIError):
@@ -33,9 +33,7 @@ class TrunkUpdateError(APIError):
     def __init__(self, e: HTTPError, trunk: Trunk):
         trunk_id = trunk.Id
         trunk_number = getattr(trunk, "Number", "N/A")
-        error_message = (
-            f"Unable to update trunk with ID {trunk_id} and number {trunk_number}."
-        )
+        error_message = f"Unable to update trunk with ID {trunk_id} and number {trunk_number}."
         super().__init__(e, error_message)
 
 

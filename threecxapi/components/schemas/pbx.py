@@ -1,17 +1,20 @@
 from decimal import Decimal
+from enum import auto
 from uuid import UUID
 from datetime import datetime
 from typing import Optional
 from pydantic import Field
-from components.schema import Schema
-from components.schemas.enums import (
+from threecxapi.components.schema import Schema
+from threecxapi.components.schemas.enums import (
     AddedBy,
     AnimationStyle,
-    Authentication, AuthenticationType,
+    Authentication,
+    AuthenticationType,
     BlockType,
     ButtonIconType,
     CallHandlingFlags,
-    ChatRecipientsType, ChatType,
+    ChatRecipientsType,
+    ChatType,
     ContactType,
     DayOfWeek,
     DestinationType,
@@ -27,7 +30,8 @@ from components.schemas.enums import (
     GroupHoursMode,
     IntegrationSyncType,
     IPInRegistrationContactType,
-    IVRForwardType, IVRType,
+    IVRForwardType,
+    IVRType,
     LiveChatCommunication,
     LiveChatGreeting,
     LiveChatLanguage,
@@ -82,6 +86,7 @@ from components.schemas.enums import (
     XferTypeEnum,
     XOperatingSystemType,
 )
+from threecxapi.util import TcxStrEnum
 
 
 class OauthStateParam(Schema):
@@ -169,14 +174,12 @@ class TrunkVariable(Schema):
 class BackupSchedule(Schema):
     Day: Optional[DayOfWeek] = None
     RepeatHours: Optional[int] = None
-    schedule_type: Optional[ScheduleType] = Field(
-        None, alias="ScheduleType")
+    schedule_type: Optional[ScheduleType] = Field(None, alias="ScheduleType")
     Time: Optional[str] = None
 
 
 class LocationSettings(Schema):
-    file_system_type: Optional[FileSystemType] = Field(
-        None, alias="FileSystemType")
+    file_system_type: Optional[FileSystemType] = Field(None, alias="FileSystemType")
     FtpPassword: Optional[str] = None
     FtpPath: Optional[str] = None
     FtpUser: Optional[str] = None
@@ -205,8 +208,7 @@ class GroupProps(Schema):
     ResellerId: Optional[str] = None
     ResellerName: Optional[str] = None
     SbcMaxCount: Optional[int] = None
-    startup_license: Optional[StartupLicense] = Field(
-        None, alias="StartupLicense")
+    startup_license: Optional[StartupLicense] = Field(None, alias="StartupLicense")
     StartupOwnerEmail: Optional[str] = None
     SubcriptionExpireDate: Optional[datetime]
     Subscription: Optional[str] = None
@@ -371,8 +373,7 @@ class LiveChatStyling(Schema):
 
 class GeneralLiveChatSettings(Schema):
     AllowSoundNotifications: Optional[bool] = None
-    authentication: Optional[Authentication] = Field(
-        None, alias="Authentication")
+    authentication: Optional[Authentication] = Field(None, alias="Authentication")
     DisableOfflineMessages: Optional[bool] = None
     EnableGA: Optional[bool] = None
     EnableOnMobile: Optional[bool] = None
@@ -388,15 +389,12 @@ class LiveChatAdvancedSettings(Schema):
 
 
 class LiveChatBox(Schema):
-    button_icon_type: Optional[ButtonIconType] = Field(
-        None, alias="ButtonIconType")
+    button_icon_type: Optional[ButtonIconType] = Field(None, alias="ButtonIconType")
     ButtonIconUrl: Optional[str] = None
     ChatDelay: Optional[int] = None
     Height: Optional[str] = None
-    live_chat_language: Optional[LiveChatLanguage] = Field(
-        None, alias="LiveChatLanguage")
-    live_message_userinfo_format: Optional[LiveMessageUserinfoFormat] = Field(
-        None, alias="LiveMessageUserinfoFormat")
+    live_chat_language: Optional[LiveChatLanguage] = Field(None, alias="LiveChatLanguage")
+    live_message_userinfo_format: Optional[LiveMessageUserinfoFormat] = Field(None, alias="LiveMessageUserinfoFormat")
     MessageDateformat: Optional[LiveChatMessageDateformat] = None
     MinimizedStyle: Optional[LiveChatMinimizedStyle] = None
     OperatorIcon: Optional[str] = None
@@ -416,8 +414,7 @@ class UpdateItem(Schema):
     Name: str
     OutOfDate: Optional[bool] = None
     ServerVersion: str
-    update_type: Optional[UpdateType] = Field(
-        None, alias="UpdateType")
+    update_type: Optional[UpdateType] = Field(None, alias="UpdateType")
 
 
 class CategoryUpdate(Schema):
@@ -510,8 +507,7 @@ class License(Schema):
 class CrmContact(Schema):
     CompanyName: Optional[str] = None
     ContactRawData: Optional[str] = None
-    contact_type: Optional[ContactType] = Field(
-        None, alias="ContactType")
+    contact_type: Optional[ContactType] = Field(None, alias="ContactType")
     ContactUrl: Optional[str] = None
     Department: Optional[str] = None
     Email: Optional[str] = None
@@ -533,8 +529,7 @@ class Destination(Schema):
     External: Optional[str] = None
     Name: Optional[str] = None
     Number: Optional[str] = None
-    peer_type: Optional[PeerType] = Field(
-        None, alias="PeerType")
+    peer_type: Optional[PeerType] = Field(None, alias="PeerType")
     To: Optional[DestinationType] = None
 
 
@@ -555,10 +550,8 @@ class BlackListNumber(Schema):
 
 
 class BlocklistAddr(Schema):
-    added_by: Optional[AddedBy] = Field(
-        None, alias="AddedBy")
-    block_type: Optional[BlockType] = Field(
-        None, alias="BlockType")
+    added_by: Optional[AddedBy] = Field(None, alias="AddedBy")
+    block_type: Optional[BlockType] = Field(None, alias="BlockType")
     Description: Optional[str] = None
     ExpiresAt: Optional[datetime]
     Id: int
@@ -571,8 +564,7 @@ class ReceptionistForward(Schema):
     ForwardType: IVRForwardType
     Id: int
     Input: Optional[str] = None
-    peer_type: Optional[PeerType] = Field(
-        None, alias="PeerType")
+    peer_type: Optional[PeerType] = Field(None, alias="PeerType")
 
 
 class UserGroup(Schema):
@@ -582,8 +574,7 @@ class UserGroup(Schema):
     MemberName: Optional[str] = None
     Name: Optional[str] = None
     Number: Optional[str] = None
-    rights: Optional[Rights] = Field(
-        None, alias="Rights")
+    rights: Optional[Rights] = Field(None, alias="Rights")
     Type: Optional[DnType] = None
 
 
@@ -596,8 +587,7 @@ class Receptionist(Schema):
     Id: int
     InvalidKeyForwardDN: Optional[str] = None
     IsRegistered: Optional[bool] = None
-    ivr_type: Optional[IVRType] = Field(
-        None, alias="IVRType")
+    ivr_type: Optional[IVRType] = Field(None, alias="IVRType")
     Name: Optional[str] = None
     Number: Optional[str] = None
     OfficeRoute: Optional[Route] = None
@@ -723,12 +713,12 @@ class Queue(Schema):
     PromptSet: Optional[str] = None
     Recording: Optional[QueueRecording] = None
     reset_queue_statistics_schedule: Optional[ResetQueueStatisticsSchedule] = Field(
-        None, alias="ResetQueueStatisticsSchedule")
+        None, alias="ResetQueueStatisticsSchedule"
+    )
     ResetStatisticsScheduleEnabled: Optional[bool] = None
     RingTimeout: Optional[int] = None
     SLATime: Optional[int] = None
-    type_of_chat_ownership_type: Optional[TypeOfChatOwnershipType] = Field(
-        None, alias="TypeOfChatOwnershipType")
+    type_of_chat_ownership_type: Optional[TypeOfChatOwnershipType] = Field(None, alias="TypeOfChatOwnershipType")
     WrapUpTime: Optional[int] = None
 
 
@@ -1199,8 +1189,7 @@ class PromptSet(Schema):
     LanguageCode: Optional[str] = None
     Prompts: list[Prompt]
     PromptSetName: Optional[str] = None
-    prompt_set_type: Optional[PromptSetType] = Field(
-        None, alias="PromptSetType")
+    prompt_set_type: Optional[PromptSetType] = Field(None, alias="PromptSetType")
     UseAlternateNumberPronunciation: Optional[bool] = None
     Version: Optional[str] = None
 
@@ -2507,8 +2496,7 @@ class CrmIntegration(Schema):
     EnabledForExternalCalls: Optional[bool] = None
     Id: str
     Name: str
-    phonebook_priority_options: Optional[PhonebookPriorityOptions] = Field(
-        None, alias="PhonebookPriorityOptions")
+    phonebook_priority_options: Optional[PhonebookPriorityOptions] = Field(None, alias="PhonebookPriorityOptions")
     PhonebookSynchronization: Optional[bool] = None
     PossibleValues: list[CrmSelectableValue] = Field(default_factory=list)
     VariableChoices: Optional[list[CrmChoice]] = None
@@ -2519,3 +2507,100 @@ class CrmTestResult(Schema):
     Log: Optional[str] = None
     Message: Optional[str] = None
     SearchResult: Optional[list[CrmContact]] = None
+
+
+class Warnings(TcxStrEnum):
+    WARNINGS_CONTACTS_SPECIFY_NAME_SURNAME_COMPANY = "WARNINGS_CONTACTS_SPECIFY_NAME_SURNAME_COMPANY"
+    WARNINGS_CONTACTS_SPECIFY_PHONE_NUMBER = "WARNINGS_CONTACTS_SPECIFY_PHONE_NUMBER"
+    WARNINGS_LENGTH_NOT_MORE_50_CHARS = "WARNINGS_LENGTH_NOT_MORE_50_CHARS"
+    WARNINGS_LENGTH_NOT_MORE_255_CHARS = "WARNINGS_LENGTH_NOT_MORE_255_CHARS"
+    WARNINGSXAPI_LENGTH_NOT_MORE_2048_CHARS = "WARNINGSXAPI_LENGTH_NOT_MORE_2048_CHARS"
+    WARNINGSXAPI_INVALID_HEX_CHARACTER = "WARNINGSXAPI_INVALID_HEX_CHARACTER"
+    WARNINGS_NO_MORE_NUMBERS_AVAILABLE = "WARNINGS_NO_MORE_NUMBERS_AVAILABLE"
+    WARNINGS_ERP_SERVER_ERROR = "WARNINGS_ERP_SERVER_ERROR"
+    WARNINGS_LICENSE_NOT_FOUND = "WARNINGS_LICENSE_NOT_FOUND"
+    WARNINGS_LIMIT_REACHED = "WARNINGS_LIMIT_REACHED"
+    WARNINGSXAPI_INVALID = "WARNINGSXAPI_INVALID"
+    WARNINGSXAPI_INVALID_PIN_NUMBER = "WARNINGSXAPI_INVALID_PIN_NUMBER"
+    WARNINGSXAPI_NOT_SUPPORTED = "WARNINGSXAPI_NOT_SUPPORTED"
+    WARNINGSXAPI_USER_ROLE_DOWNGRADE = "WARNINGSXAPI_USER_ROLE_DOWNGRADE"
+    WARNINGS_GROUP_CANNOT_BE_DELETED = "WARNINGS_GROUP_CANNOT_BE_DELETED"
+    WARNINGS_CANNOT_BE_DELETED = "WARNINGS_CANNOT_BE_DELETED"
+    WARNINGS_GROUP_WITH_MEMBERS_CANNOT_BE_DELETED = "WARNINGS_GROUP_WITH_MEMBERS_CANNOT_BE_DELETED"
+    WARNINGSXAPI_OTHER_USER_ROLE_DOWNGRADE = "WARNINGSXAPI_OTHER_USER_ROLE_DOWNGRADE"
+    WARNINGSXAPI_INVALID_LICENSE_TYPE = "WARNINGSXAPI_INVALID_LICENSE_TYPE"
+    WARNINGSXAPI_INVALID_PASSWORD = "WARNINGSXAPI_INVALID_PASSWORD"
+    WARNINGSXAPI_NOT_FOUND = "WARNINGSXAPI_NOT_FOUND"
+    WARNINGSXAPI_FILE_NOT_FOUND = "WARNINGSXAPI_FILE_NOT_FOUND"
+    WARNINGSXAPI_FILE_NOT_ACCESSIBLE = "WARNINGSXAPI_FILE_NOT_ACCESSIBLE"
+    WARNINGSXAPI_REQUIRED = "WARNINGSXAPI_REQUIRED"
+    WARNINGSXAPI_CAN_NOT_BE_EMPTY_STRING = "WARNINGSXAPI_CAN_NOT_BE_EMPTY_STRING"
+    WARNINGSXAPI_DUPLICATE = "WARNINGSXAPI_DUPLICATE"
+    WARNINGSXAPI_ALREADY_IN_USE = "WARNINGSXAPI_ALREADY_IN_USE"
+    WARNINGSXAPI_PLAYLIST_IN_USE = "WARNINGSXAPI_PLAYLIST_IN_USE"
+    WARNINGSXAPI_OUT_OF_THE_RANGE = "WARNINGSXAPI_OUT_OF_THE_RANGE"
+    WARNINGSXAPI_TOO_MANY_PHONES = "WARNINGSXAPI_TOO_MANY_PHONES"
+    WARNINGSXAPI_TOO_MANY_SBC = "WARNINGSXAPI_TOO_MANY_SBC"
+    WARNINGSXAPI_TOO_MANY_PROMPTS = "WARNINGSXAPI_TOO_MANY_PROMPTS"
+    WARNINGSXAPI_OUTBOUND_RULES_LIMIT_REACHED = "WARNINGSXAPI_OUTBOUND_RULES_LIMIT_REACHED"
+    WARNINGSXAPI_FORBIDDEN_CHANGE = "WARNINGSXAPI_FORBIDDEN_CHANGE"
+    WARNINGS_FAX_SERVER_CANNOT_BE_DELETED = "WARNINGS_FAX_SERVER_CANNOT_BE_DELETED"
+    WARNINGS_OPERATOR_CANNOT_BE_DELETED = "WARNINGS_OPERATOR_CANNOT_BE_DELETED"
+    WARNINGS_USER_EXTENSION_CANNOT_BE_DELETED = "WARNINGS_USER_EXTENSION_CANNOT_BE_DELETED"
+    WARNINGSXAPI_NUMBER_IGNORED = "WARNINGSXAPI_NUMBER_IGNORED"
+    WARNINGSXAPI_INVALID_TIMEZONE = "WARNINGSXAPI_INVALID_TIMEZONE"
+    WARNINGSXAPI_INVALID_PATH = "WARNINGSXAPI_INVALID_PATH"
+    WARNINGSXAPI_PATH_SHOULD_NOT_CONTAIN_SPACES = "WARNINGSXAPI_PATH_SHOULD_NOT_CONTAIN_SPACES"
+    WARNINGSXAPI_INVALID_CREDENTIALS = "WARNINGSXAPI_INVALID_CREDENTIALS"
+    WARNINGSXAPI_CANNOT_CONNECT_FTP = "WARNINGSXAPI_CANNOT_CONNECT_FTP"
+    WARNINGSXAPI_CANNOT_CONNECT_SMB = "WARNINGSXAPI_CANNOT_CONNECT_SMB"
+    WARNINGSXAPI_CANNOT_CONNECT_SFTP = "WARNINGSXAPI_CANNOT_CONNECT_SFTP"
+    WARNINGSXAPI_CANNOT_CONNECT_GOOGLE_BUCKET = "WARNINGSXAPI_CANNOT_CONNECT_GOOGLE_BUCKET"
+    WARNINGSXAPI_PLAYLIST_NO_SOURCE = "WARNINGSXAPI_PLAYLIST_NO_SOURCE"
+    WARNINGSXAPI_NO_USERS_IN_TEAMS = "WARNINGSXAPI_NO_USERS_IN_TEAMS"
+    WARNINGSXAPI_FILE_FORMAT_IS_INCORRECT = "WARNINGSXAPI_FILE_FORMAT_IS_INCORRECT"
+    WARNINGSXAPI_INVALID_FILE_NAME = "WARNINGSXAPI_INVALID_FILE_NAME"
+    WARNINGS_CSV_INVALID_FILE_FORMAT = "WARNINGS_CSV_INVALID_FILE_FORMAT"
+    WARNINGS_CSV_LINE_CORRUPTED = "WARNINGS_CSV_LINE_CORRUPTED"
+    WARNINGS_WRONG_CSV_FILE_REQUIRED_COLUMNS_NOT_FOUND = "WARNINGS_WRONG_CSV_FILE_REQUIRED_COLUMNS_NOT_FOUND"
+    WARNINGS_CSV_IMPORT_LIMIT_REACHED = "WARNINGS_CSV_IMPORT_LIMIT_REACHED"
+    WARNINGS_WRONG_CSV_FILE_REQUIRED_HEADER_NOT_FOUND = "WARNINGS_WRONG_CSV_FILE_REQUIRED_HEADER_NOT_FOUND"
+    WARNINGSXAPI_FILE_IS_TOO_LARGE = "WARNINGSXAPI_FILE_IS_TOO_LARGE"
+    WARNINGSXAPI_SBC_CERT_FQDN_MISMATCH = "WARNINGSXAPI_SBC_CERT_FQDN_MISMATCH"
+    WARNINGSXAPI_SBC_CERT_EXPIRED = "WARNINGSXAPI_SBC_CERT_EXPIRED"
+    WARNINGSXAPI_SBC_KEY_CERT_MISMATCH = "WARNINGSXAPI_SBC_KEY_CERT_MISMATCH"
+    WARNINGSXAPI_NON_EXISTENT_EXT_NUMBER = "WARNINGSXAPI_NON_EXISTENT_EXT_NUMBER"
+    WARNINGSXAPI_MCM_MODE_REQUIRED = "WARNINGSXAPI_MCM_MODE_REQUIRED"
+    WARNINGS_INTERNATIONALPREFIX_IS_MISSING = "WARNINGS_INTERNATIONALPREFIX_IS_MISSING"
+    WARNINGS_TIMEZONEID_IS_MISSING = "WARNINGS_TIMEZONEID_IS_MISSING"
+    WARNINGSXAPI_CHAT_LOG_IS_DISABLED = "WARNINGSXAPI_CHAT_LOG_IS_DISABLED"
+    WARNINGS_WAKEUP_IVR_EXISTS = "WARNINGS_WAKEUP_IVR_EXISTS"
+    WARNINGS_RING_GROUP_ENABLE_PAGING = "WARNINGS_RING_GROUP_ENABLE_PAGING"
+    WARNINGSXAPI_CREATE_1_SIP_TRUCK_EMERGENCY = "WARNINGSXAPI_CREATE_1_SIP_TRUCK_EMERGENCY"
+    WARNINGS_DELETING_ALREADY_IN_PROGRESS = "WARNINGS_DELETING_ALREADY_IN_PROGRESS"
+    WARNINGS_INVALID_IP_MASK = "WARNINGS_INVALID_IP_MASK"
+    WARNINGS_TOO_MANY_BACKUPS = "WARNINGS_TOO_MANY_BACKUPS"
+    WARNINGS_BACKUP_LOCATION_CONFIG_ERROR = "WARNINGS_BACKUP_LOCATION_CONFIG_ERROR"
+    WARNINGS_BACKUP_NOT_FOUND_OR_INVALID = "WARNINGS_BACKUP_NOT_FOUND_OR_INVALID"
+    WARNINGS_INVALID_CALL_FLOW_FILE = "WARNINGS_INVALID_CALL_FLOW_FILE"
+    WARNINGS_ALREADY_EXPIRED = "WARNINGS_ALREADY_EXPIRED"
+    WARNINGS_CALL_FLOW_MUST_BE_ALPHANUMERIC = "WARNINGS_CALL_FLOW_MUST_BE_ALPHANUMERIC"
+    WARNINGS_EXTRACTING_OUTSIDE_THE_DESTINATION_DIRECTORY = "WARNINGS_EXTRACTING_OUTSIDE_THE_DESTINATION_DIRECTORY"
+    WARNINGS_INVALID_EXTENSION_NUMBER_LENGTH = "WARNINGS_INVALID_EXTENSION_NUMBER_LENGTH"
+    WARNINGS_DN_NUMBER_CANNOT_BE_USED = "WARNINGS_DN_NUMBER_CANNOT_BE_USED"
+    WARNINGS_WIRESHARK_NOT_FOUND = "WARNINGS_WIRESHARK_NOT_FOUND"
+    WARNINGS_CAPTURE_LOCALHOST_NOT_ALLOWED = "WARNINGS_CAPTURE_LOCALHOST_NOT_ALLOWED"
+    WARNINGS_CAPTURE_ONGOING = "WARNINGS_CAPTURE_ONGOING"
+    WARNINGS_CANNOT_DELETE_TRUNKS_BINDED_ERMERGENCY_NUMBER = "WARNINGS_CANNOT_DELETE_TRUNKS_BINDED_ERMERGENCY_NUMBER"
+    WARNINGS_BLACKLIST_NUMBER_LIMIT_EXCEEDED = "WARNINGS_BLACKLIST_NUMBER_LIMIT_EXCEEDED"
+    WARNINGS_DOUBLE_QUOTES_NOT_ALLOWED = "WARNINGS_DOUBLE_QUOTES_NOT_ALLOWED"
+    WARNINGS_MCU_REQUEST_ALREADY_IN_PROGRESS = "WARNINGS_MCU_REQUEST_ALREADY_IN_PROGRESS"
+    WARNINGS_MCU_LIMIT_REACHED = "WARNINGS_MCU_LIMIT_REACHED"
+    WARNINGS_MCU_WEBMEETING_BRIDGE_NOT_FOUND = "WARNINGS_MCU_WEBMEETING_BRIDGE_NOT_FOUND"
+    WARNINGS_MCU_REQUEST_NOT_FOUND = "WARNINGS_MCU_REQUEST_NOT_FOUND"
+    WARNINGS_MCU_REQUEST_TIMEOUT = "WARNINGS_MCU_REQUEST_TIMEOUT"
+    WARNINGS_SUPPORTED_MEDIA_FORMAT_WAV = "WARNINGS_SUPPORTED_MEDIA_FORMAT_WAV"
+    WARNINGS_NO_SECRET_DEFINED = "WARNINGS_NO_SECRET_DEFINED"
+    WARNINGS_INVALID_SECURITY_CODE = "WARNINGS_INVALID_SECURITY_CODE"
+    WARNINGS_UNABLE_REACH_UPDATES_SERVER = "WARNINGS_UNABLE_REACH_UPDATES_SERVER"
+    WARNINGS_ERROR_DOWNLOADING_FROM_UPDATES_SERVER = "WARNINGS_ERROR_DOWNLOADING_FROM_UPDATES_SERVER"

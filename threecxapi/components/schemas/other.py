@@ -1,19 +1,25 @@
 from typing import Optional
 from typing import Any
-from components.schemas.pbx import Schema
+from threecxapi.components.schemas.pbx import Schema
+from pydantic import Field
+
+
+class StringCollectionResponse(Schema):
+    value: list[str]
 
 
 class ReferenceUpdate(Schema):
-    # '@odata.id': str = ''
-    # '@odata.type': Optional[str]
-    id: str
-    type: Optional[str] = None
+    id: str = Field(None, alias="@odata.id")
+    type: str = Field(None, alias="@odata.type")
 
 
 class ReferenceCreate(Schema):
-    # '@odata.id': str
-    id: str
+    id: str = Field(None, alias="@odata.id")
     additionalProperties: Any
+
+
+class BaseCollectionPaginationCountResponse(Schema):
+    count: str = Field(None, alias="@odata.count")
 
 
 class ReplaceMyGroupLicenseKeyRequestBody(Schema):
