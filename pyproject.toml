@@ -34,3 +34,5 @@ line-length = 120
 
 [tool.setuptools_scm]
 write_to = "threecxapi/_version.py"  # Optional: Writes the version to a file for runtime use
+version_scheme = "post-release"
+local_scheme = "no-local-version"
