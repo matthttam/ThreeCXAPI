@@ -162,3 +162,6 @@ cython_debug/
 .vscode
 launch.json
 venv/
+
+# Ignore the automatically generated version file
+threecxapi/_version.py
