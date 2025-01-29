@@ -165,7 +165,5 @@ class GroupsResource(APIResource):
         return {}
 
     def get_default_group(self) -> Group | None:
-        group_collection_response = self.list_group(params=ListGroupParameters(filter="IsDefault eq true"))
-        if group_collection_response.value:
-            return group_collection_response.value[0]
-        return None
+        response = self.list_group(params=ListGroupParameters(filter="IsDefault eq true"))
+        return response.value[0] if response.value else None
