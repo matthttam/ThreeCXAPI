@@ -224,3 +224,14 @@ class TestGroupsResource:
         # setup for a new group, this is business logic and doesn't belong in this extension.
         # This will be removed later.
         pytest.skip()
+
+    @patch("threecxapi.resources.groups.GroupsResource.list_group")
+    def test_get_default_group(self, mock_list_group, groups_resource):
+        mock_group = MagicMock(spec=Group)
+        mock_group_collection_response = MagicMock(spec=GroupCollectionResponse)
+        mock_group_collection_response.value = [mock_group]
+        mock_list_group.return_value = mock_group_collection_response
+
+        response = groups_resource.get_default_group()
+
+        assert response == mock_group_collection_response.value[0]

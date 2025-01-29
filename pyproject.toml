@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "threecxapi"
-authors = [{ name = "Matt Henry", email = "matthttam8411@gmail.com" }]
+authors = [{ name = "Matt Henry", email = "matthttam@gmail.com" }]
 description = "This is a python wrapper for the 3CX API. It is designed to make it easier to interact with the 3CX API. It is a work in progress and is not yet feature complete. It is designed to be used with the official 3CX v20 API."
 readme = "README.md"
 requires-python = ">=3.12"
