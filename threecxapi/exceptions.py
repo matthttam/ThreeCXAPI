@@ -1,5 +1,5 @@
 from requests import HTTPError
-from threecxapi.components.schemas.ODataErrors import ODataError
+from threecxapi.components.schemas.pbx.ODataErrors.ODataErrors import ODataError
 from json import JSONDecodeError
 from pydantic import TypeAdapter
 from pydantic_core import ValidationError

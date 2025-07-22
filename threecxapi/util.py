@@ -17,8 +17,43 @@ class TcxStrEnumMeta(EnumMeta):
         return super().__getitem__(name).value
 
 
-class TcxStrEnum(StrEnum, metaclass=TcxStrEnumMeta):
+#class TcxStrEnum(StrEnum, metaclass=TcxStrEnumMeta):
+#    @staticmethod
+#    def _generate_next_value_(name, start, count, last_values):
+#        value = TcxStrEnumMeta.SPECIAL_STRING_MAP_INV.get(name, name)
+#        return value.replace('__', '.')
+
+from enum import StrEnum, auto
+
+class TcxStrEnum(StrEnum):
+
+    @property
+    def is_valid(self) -> bool:
+        """Check if the enum member is valid."""
+        return getattr(self, "_is_valid", True)
+
     @staticmethod
     def _generate_next_value_(name, start, count, last_values):
         value = TcxStrEnumMeta.SPECIAL_STRING_MAP_INV.get(name, name)
         return value.replace('__', '.')
+
+    def __new__(cls, value):
+        # This is still fine for defined values
+        obj = str.__new__(cls, value)
+        obj._value_ = value
+        obj._is_valid = True  # Indicates it's a valid enum member
+        return obj
+
+    @classmethod
+    def _missing_(cls, value):
+        if not isinstance(value, str):
+            raise ValueError(f"{value!r} is not a valid {cls.__name__}")
+        
+        # Bypass __new__ and avoid recursion by calling `str.__new__` directly
+        obj = str.__new__(cls, value)
+        obj._name_ = None  # Indicates it's not one of the defined enum members
+        obj._value_ = value
+        obj._is_valid = False # Indicates it's not a valid enum member
+        return obj
+        
+

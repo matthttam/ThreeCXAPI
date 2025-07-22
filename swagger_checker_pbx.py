@@ -2,32 +2,31 @@ import yaml
 import inspect
 import re
 import keyword
-
-import keyword
 import builtins
+import threecxapi.components.schemas.pbx as pbx_module
 
-import threecxapi.components.schemas.pbx as pbx_module  # Update if needed
 
 def extract_enum_definitions(yaml_file_path: str) -> dict[str, list[str]]:
-    with open(yaml_file_path, 'r') as f:
+    with open(yaml_file_path, "r") as f:
         data = yaml.safe_load(f)
 
-    schemas = data.get('components', {}).get('schemas', {})
+    schemas = data.get("components", {}).get("schemas", {})
     enum_definitions = {}
 
     for name, definition in schemas.items():
-        enum_values = definition.get('enum')
+        enum_values = definition.get("enum")
         if enum_values:
             clean_name = name.removeprefix("Pbx.")
             enum_definitions[clean_name] = enum_values
 
     return enum_definitions
 
+
 def extract_object_schemas(yaml_file_path: str) -> dict[str, dict]:
-    with open(yaml_file_path, 'r') as f:
+    with open(yaml_file_path, "r") as f:
         data = yaml.safe_load(f)
 
-    schemas = data.get('components', {}).get('schemas', {})
+    schemas = data.get("components", {}).get("schemas", {})
     object_definitions = {}
 
     for name, definition in schemas.items():
@@ -58,7 +57,7 @@ def map_openapi_type(schema: dict) -> str:
 
     if "$ref" in schema:
         ref = schema["$ref"].split("/")[-1]
-        result = ref.split('.')[-1]
+        result = ref.split(".")[-1]
     elif type_ == "string":
         result = "str"
     elif type_ == "integer":
@@ -78,10 +77,11 @@ def map_openapi_type(schema: dict) -> str:
 
     return f"Optional[{result}]" if nullable or type_ == "array" else result
 
+
 def sort_missing_classes(missing: set[str], swagger_objects: dict) -> list[str]:
     def normalize_name(name: str) -> str:
         if name.startswith("Pbx."):
-            return name[len("Pbx."):]
+            return name[len("Pbx.") :]
         return name
 
     sorted_list = []
@@ -134,10 +134,8 @@ def sort_missing_classes(missing: set[str], swagger_objects: dict) -> list[str]:
     return sorted_list
 
 
-
-
 if __name__ == "__main__":
-    file_path = './openapi/openapi_3.0.4.yml'
+    file_path = "./openapi/openapi_3.0.4.yml"
     swagger_objects = extract_object_schemas(file_path)
     swagger_enums = extract_enum_definitions(file_path)
     python_classes = get_schema_class_fields(pbx_module)
@@ -211,12 +209,10 @@ if __name__ == "__main__":
                         unique_union.append(t)
 
                 type_hint = " | ".join(unique_union)
-                #type_hint = union_str if is_required else f"Optional[{union_str}]"
+                # type_hint = union_str if is_required else f"Optional[{union_str}]"
 
             else:
                 type_hint = map_openapi_type(prop_schema)
-
-
 
             is_required = prop_name in required
 
@@ -228,11 +224,7 @@ if __name__ == "__main__":
             elif prop_name in banned_names:
                 final_name = to_snake_case(prop_name)
                 alias_snippet = f', alias="{prop_name}"'
-            elif (
-                prop_name in swagger_enum_names
-                or f"Pbx.{prop_name}" in swagger_object_names
-                or prop_name in swagger_object_names
-            ):
+            elif prop_name in swagger_enum_names or f"Pbx.{prop_name}" in swagger_object_names or prop_name in swagger_object_names:
                 final_name = to_snake_case(prop_name)
                 alias_snippet = f', alias="{prop_name}"' if final_name != prop_name else ""
             else:
@@ -249,31 +241,25 @@ if __name__ == "__main__":
             else:
                 print(f"    {final_name}: {type_hint} = Field(default=None{alias_snippet})")
 
-
-
-
-
-    #print("\n=== Extra in Python ===")
-    #for name in sorted(extra_in_python):
+    # print("\n=== Extra in Python ===")
+    # for name in sorted(extra_in_python):
     #    print(name)
 
-
-
-    #print("\n=== Differences in Properties ===")
-    #for obj_name in sorted(swagger_object_names & python_class_names):
+    # print("\n=== Differences in Properties ===")
+    # for obj_name in sorted(swagger_object_names & python_class_names):
     #    swagger_props = set(swagger_objects[obj_name])
     #    python_props = set(python_classes[obj_name])
 #
-    #    missing_props = swagger_props - python_props
-    #    extra_props = python_props - swagger_props
+#    missing_props = swagger_props - python_props
+#    extra_props = python_props - swagger_props
 #
-    #    if missing_props or extra_props:
-    #        print(f"\nIn object '{obj_name}':")
-    #        if missing_props:
-    #            print("  Missing properties:")
-    #            for prop in sorted(missing_props):
-    #                print(f"    {prop}")
-    #        if extra_props:
-    #            print("  Extra properties:")
-    #            for prop in sorted(extra_props):
-    #                print(f"    {prop}")
+#    if missing_props or extra_props:
+#        print(f"\nIn object '{obj_name}':")
+#        if missing_props:
+#            print("  Missing properties:")
+#            for prop in sorted(missing_props):
+#                print(f"    {prop}")
+#        if extra_props:
+#            print("  Extra properties:")
+#            for prop in sorted(extra_props):
+#                print(f"    {prop}")

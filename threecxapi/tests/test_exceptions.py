@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch, PropertyMock
 from requests import HTTPError, Response
 import pytest
 from threecxapi.exceptions import APIError, APIAuthenticationError, APIAuthenticationTokenRefreshError
-from threecxapi.components.schemas.ODataErrors import ODataError
+from threecxapi.components.schemas.pbx.ODataErrors.ODataErrors import ODataError
 
 
 class TestAPIError:
