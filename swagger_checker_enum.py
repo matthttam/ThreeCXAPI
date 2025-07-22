@@ -1,23 +1,24 @@
 import yaml
 import inspect
 import enum
-import threecxapi.components.schemas.enums as enums_module
+import threecxapi.components.schemas.pbx.enums as enums_module
 
 
 def extract_enum_definitions(yaml_file_path: str) -> dict[str, list[str]]:
-    with open(yaml_file_path, 'r') as f:
+    with open(yaml_file_path, "r") as f:
         data = yaml.safe_load(f)
 
-    schemas = data.get('components', {}).get('schemas', {})
+    schemas = data.get("components", {}).get("schemas", {})
     enum_definitions = {}
 
     for name, definition in schemas.items():
-        enum_values = definition.get('enum')
+        enum_values = definition.get("enum")
         if enum_values:
             clean_name = name.removeprefix("Pbx.")
             enum_definitions[clean_name] = enum_values
 
     return enum_definitions
+
 
 def get_enum_classes(module) -> dict[str, list[str]]:
     enum_classes = {}
@@ -30,8 +31,9 @@ def get_enum_classes(module) -> dict[str, list[str]]:
 
     return enum_classes
 
+
 if __name__ == "__main__":
-    swagger_enums = extract_enum_definitions('./openapi/openapi_3.0.4.yml')
+    swagger_enums = extract_enum_definitions("./openapi/openapi_3.0.4.yml")
     python_enums = get_enum_classes(enums_module)
 
     swagger_enum_names = set(swagger_enums.keys())
@@ -45,7 +47,7 @@ if __name__ == "__main__":
         properties = swagger_enums[name]
         print(f"\nclass {name}(TcxStrEnum):")
         for property in properties:
-            value = 'auto()'
+            value = "auto()"
             # Replace special strings
             if property == "None":
                 property = "NONE"
@@ -53,9 +55,9 @@ if __name__ == "__main__":
                 property = "NEGATIVE_INF"
 
             # Replace dots with double underscores
-            if '.' in property:
+            if "." in property:
                 value = repr(property)
-                property = property.replace('.', '__')
+                property = property.replace(".", "__")
 
             # Ensure it's a valid identifier
             if not property.isidentifier():
@@ -84,8 +86,8 @@ for enum_name in sorted(swagger_enum_names & python_enum_names):
             val = "TRUE"
 
         # Replace dots with double underscores
-        if isinstance(val, str) and '.' in val:
-            val = val.replace('.', '__')
+        if isinstance(val, str) and "." in val:
+            val = val.replace(".", "__")
 
         # Make valid identifier
         if isinstance(val, str) and not val.isidentifier():
@@ -94,8 +96,6 @@ for enum_name in sorted(swagger_enum_names & python_enum_names):
 
     swagger_properties = set(map_property_name(val) for val in swagger_properties_raw)
 
-    # Load the actual enum class and get its member names
-    import threecxapi.components.schemas.enums as enums_module
     enum_cls = getattr(enums_module, enum_name, None)
     if enum_cls is None:
         continue

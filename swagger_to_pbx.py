@@ -53,15 +53,24 @@ def to_snake_case(name: str) -> str:
 
 def map_openapi_type(schema: dict) -> str:
     type_ = schema.get("type")
+    format_ = schema.get("format")
     nullable = schema.get("nullable", False)
 
     if "$ref" in schema:
         ref = schema["$ref"].split("/")[-1]
         result = ref.split(".")[-1]
     elif type_ == "string":
-        result = "str"
+        if format_ == "uuid":
+            result = "UUID"
+        elif format_ == "date-time":
+            result = "datetime"
+        else:
+            result = "str"
     elif type_ == "integer":
-        result = "int"
+        if format_ == "decimal":
+            result = "Decimal"
+        else:
+            result = "int"
     elif type_ == "number":
         result = "float"
     elif type_ == "boolean":
@@ -148,7 +157,6 @@ if __name__ == "__main__":
     extra_in_python = python_class_names - swagger_object_names
     sorted_missing = sort_missing_classes(missing_in_python, swagger_objects)
 
-    print("# === Missing in Python ===")
     for name in sorted_missing:
         definition = swagger_objects[name]
         class_name = name.split(".")[-1]
@@ -176,7 +184,7 @@ if __name__ == "__main__":
             required = set(definition.get("required", []))
             bases = "Schema"
 
-        print(f"\nclass {class_name}({bases}):")
+        print(f"\n\nclass {class_name}({bases}):")
         if not props:
             print("    pass")
             continue

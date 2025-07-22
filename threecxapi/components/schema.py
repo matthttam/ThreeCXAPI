@@ -1,10 +1,7 @@
-from typing import Any, Optional, get_args, get_origin
-import inspect
+from typing import Any
 from enum import auto
 from functools import lru_cache
-
-from pydantic import BaseModel, ConfigDict, field_validator, PrivateAttr, model_validator, ValidationError
-
+from pydantic import BaseModel, PrivateAttr
 from threecxapi.util import TcxStrEnum
 
 

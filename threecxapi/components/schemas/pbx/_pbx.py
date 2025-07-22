@@ -10,7 +10,7 @@ from threecxapi.components.schemas.pbx.enums import *
 
 class AbandonedChatsStatistics(Schema):
     ChatId: int = Field(default=None)
-    DateOfRequest: str = Field(default=None)
+    DateOfRequest: datetime = Field(default=None)
     ParticipantEmail: str = Field(default=None)
     ParticipantMessage: str = Field(default=None)
     ParticipantName: Optional[str] = Field(default=None)
@@ -25,8 +25,8 @@ class AbandonedChatsStatistics(Schema):
 class AbandonedQueueCalls(Schema):
     CallerId: Optional[str] = Field(default=None)
     CallHistoryId: Optional[str] = Field(default=None)
-    CallTime: Optional[str] = Field(default=None)
-    CallTimeForCsv: Optional[str] = Field(default=None)
+    CallTime: Optional[datetime] = Field(default=None)
+    CallTimeForCsv: Optional[datetime] = Field(default=None)
     ExtensionDisplayName: Optional[str] = Field(default=None)
     ExtensionDn: Optional[str] = Field(default=None)
     IsLoggedIn: Optional[bool] = Field(default=None)
@@ -39,28 +39,28 @@ class AbandonedQueueCalls(Schema):
 class ActiveCall(Schema):
     Callee: Optional[str] = Field(default=None)
     Caller: Optional[str] = Field(default=None)
-    EstablishedAt: Optional[str] = Field(default=None)
+    EstablishedAt: Optional[datetime] = Field(default=None)
     Id: int = Field(default=None)
-    LastChangeStatus: Optional[str] = Field(default=None)
-    ServerNow: Optional[str] = Field(default=None)
+    LastChangeStatus: Optional[datetime] = Field(default=None)
+    ServerNow: Optional[datetime] = Field(default=None)
     Status: Optional[str] = Field(default=None)
 
 
 class ActivityLogEvent(Schema):
     Index: int = Field(default=None)
     Message: Optional[str] = Field(default=None)
-    TimeStamp: Optional[str] = Field(default=None)
+    TimeStamp: Optional[datetime] = Field(default=None)
 
 
 class AgentLoginHistory(Schema):
     Agent: str = Field(default=None)
     AgentNo: str = Field(default=None)
-    Day: Optional[str] = Field(default=None)
+    Day: Optional[datetime] = Field(default=None)
     LoggedInDayInterval: Optional[str] = Field(default=None)
-    loggedInDt: Optional[str] = Field(default=None)
+    loggedInDt: Optional[datetime] = Field(default=None)
     LoggedInInterval: Optional[str] = Field(default=None)
     LoggedInTotalInterval: Optional[str] = Field(default=None)
-    LoggedOutDt: Optional[str] = Field(default=None)
+    LoggedOutDt: Optional[datetime] = Field(default=None)
     QueueNo: str = Field(default=None)
     TalkingDayInterval: Optional[str] = Field(default=None)
     TalkingInterval: Optional[str] = Field(default=None)
@@ -111,7 +111,7 @@ class AuditLog(Schema):
     ObjectType: Optional[int] = Field(default=None)
     PrevData: Optional[str] = Field(default=None)
     Source: Optional[int] = Field(default=None)
-    Timestamp: Optional[str] = Field(default=None)
+    Timestamp: Optional[datetime] = Field(default=None)
     UserName: Optional[str] = Field(default=None)
 
 
@@ -149,7 +149,7 @@ class BackupSchedule(Schema):
 
 
 class Backups(Schema):
-    CreationTime: Optional[str] = Field(default=None)
+    CreationTime: Optional[datetime] = Field(default=None)
     DownloadLink: str = Field(default=None)
     FileName: str = Field(default=None)
     Size: Optional[int] = Field(default=None)
@@ -205,7 +205,7 @@ class BlocklistAddr(Schema):
     added_by: AddedBy = Field(default=None, alias="AddedBy")
     block_type: BlockType = Field(default=None, alias="BlockType")
     Description: Optional[str] = Field(default=None)
-    ExpiresAt: Optional[str] = Field(default=None)
+    ExpiresAt: Optional[datetime] = Field(default=None)
     Id: int = Field(default=None)
     IPAddrMask: Optional[str] = Field(default=None)
 
@@ -216,7 +216,7 @@ class BlocklistAddrCollectionResponse(BaseCollectionPaginationCountResponse):
 
 class BreachesSla(Schema):
     CallerId: str = Field(default=None)
-    CallTime: str = Field(default=None)
+    CallTime: datetime = Field(default=None)
     queue: str = Field(default=None, alias="Queue")
     QueueDnNumber: Optional[str] = Field(default=None)
     WaitingTime: Optional[str] = Field(default=None)
@@ -256,7 +256,7 @@ class CIDFormattingCollectionResponse(BaseCollectionPaginationCountResponse):
 
 
 class CallCostByExtensionGroup(Schema):
-    BillingCost: Optional[int] = Field(default=None)
+    BillingCost: Optional[Decimal] = Field(default=None)
     CallType: Optional[str] = Field(default=None)
     DstDn: Optional[str] = Field(default=None)
     DstDnClass: Optional[int] = Field(default=None)
@@ -266,7 +266,7 @@ class CallCostByExtensionGroup(Schema):
     SegId: str = Field(default=None)
     SrcDisplayName: Optional[str] = Field(default=None)
     SrcDn: Optional[str] = Field(default=None)
-    StartTime: Optional[str] = Field(default=None)
+    StartTime: Optional[datetime] = Field(default=None)
     TalkingDur: Optional[str] = Field(default=None)
 
 
@@ -288,7 +288,7 @@ class CallCostSettingsCollectionResponse(BaseCollectionPaginationCountResponse):
 
 
 class CallDistribution(Schema):
-    DateTimeInterval: str = Field(default=None)
+    DateTimeInterval: datetime = Field(default=None)
     IncomingCount: int = Field(default=None)
     OutgoingCount: int = Field(default=None)
 
@@ -322,9 +322,9 @@ class CallHistoryView(Schema):
     DstParticipantId: int = Field(default=None)
     DstRecId: Optional[int] = Field(default=None)
     SegmentActionId: int = Field(default=None)
-    SegmentEndTime: str = Field(default=None)
+    SegmentEndTime: datetime = Field(default=None)
     SegmentId: int = Field(default=None)
-    SegmentStartTime: str = Field(default=None)
+    SegmentStartTime: datetime = Field(default=None)
     SegmentType: int = Field(default=None)
     SrcCallerNumber: Optional[str] = Field(default=None)
     SrcDisplayName: Optional[str] = Field(default=None)
@@ -349,7 +349,7 @@ class CallLogData(Schema):
     ActionDnType: Optional[int] = Field(default=None)
     ActionType: Optional[int] = Field(default=None)
     Answered: Optional[bool] = Field(default=None)
-    CallCost: Optional[int] = Field(default=None)
+    CallCost: Optional[Decimal] = Field(default=None)
     CallHistoryId: Optional[str] = Field(default=None)
     CallId: int = Field(default=None)
     CallType: Optional[str] = Field(default=None)
@@ -373,7 +373,7 @@ class CallLogData(Schema):
     SourceDn: Optional[str] = Field(default=None)
     SourceType: Optional[int] = Field(default=None)
     SrcRecId: Optional[int] = Field(default=None)
-    StartTime: Optional[str] = Field(default=None)
+    StartTime: Optional[datetime] = Field(default=None)
     Status: Optional[str] = Field(default=None)
     SubrowDescNumber: Optional[int] = Field(default=None)
     Summary: Optional[str] = Field(default=None)
@@ -453,7 +453,7 @@ class ChatHistoryView(Schema):
     ProviderType: ChatType = Field(default=None)
     QueueNumber: Optional[str] = Field(default=None)
     Source: Optional[str] = Field(default=None)
-    TimeSent: str = Field(default=None)
+    TimeSent: datetime = Field(default=None)
 
 
 class ChatHistoryViewCollectionResponse(BaseCollectionPaginationCountResponse):
@@ -485,7 +485,7 @@ class ChatMessagesHistoryView(Schema):
     SenderParticipantNo: Optional[str] = Field(default=None)
     SenderParticipantPbx: Optional[str] = Field(default=None)
     SenderParticipantPhone: Optional[str] = Field(default=None)
-    TimeSent: str = Field(default=None)
+    TimeSent: datetime = Field(default=None)
 
 
 class ChatMessagesHistoryViewCollectionResponse(BaseCollectionPaginationCountResponse):
@@ -821,7 +821,7 @@ class DetailedQueueStatisticsCollectionResponse(BaseCollectionPaginationCountRes
 class DeviceInfo(Schema):
     Assigned: Optional[bool] = Field(default=None)
     AssignedUser: Optional[str] = Field(default=None)
-    DetectedAt: Optional[str] = Field(default=None)
+    DetectedAt: Optional[datetime] = Field(default=None)
     FirmwareVersion: Optional[str] = Field(default=None)
     Id: int = Field(default=None)
     InterfaceLink: Optional[str] = Field(default=None)
@@ -934,7 +934,7 @@ class EventLog(Schema):
     Message: Optional[str] = Field(default=None)
     Params: Optional[list[Optional[str]]] = Field(default=None)
     Source: Optional[str] = Field(default=None)
-    TimeGenerated: Optional[str] = Field(default=None)
+    TimeGenerated: Optional[datetime] = Field(default=None)
     Type: EventLogType = Field(default=None)
 
 
@@ -1292,7 +1292,7 @@ class GroupProps(Schema):
     SbcMaxCount: Optional[int] = Field(default=None)
     startup_license: StartupLicense = Field(default=None, alias="StartupLicense")
     StartupOwnerEmail: Optional[str] = Field(default=None)
-    SubcriptionExpireDate: Optional[str] = Field(default=None)
+    SubcriptionExpireDate: Optional[datetime] = Field(default=None)
     Subscription: Optional[str] = Field(default=None)
     SubscriptionType: Optional[str] = Field(default=None)
     SystemNumberFrom: Optional[str] = Field(default=None)
@@ -1354,7 +1354,7 @@ class InboundCall(Schema):
     SourceCallerId: Optional[str] = Field(default=None)
     SourceDisplayName: Optional[str] = Field(default=None)
     SourceDn: Optional[str] = Field(default=None)
-    StartTime: str = Field(default=None)
+    StartTime: datetime = Field(default=None)
     Status: Optional[str] = Field(default=None)
     Summary: Optional[str] = Field(default=None)
     TalkingDuration: str = Field(default=None)
@@ -1381,8 +1381,8 @@ class InboundRuleReportCollectionResponse(BaseCollectionPaginationCountResponse)
 
 
 class InstallUpdates(Schema):
-    Entries: Optional[list[str]] = Field(default=None)
-    Key: str = Field(default=None)
+    Entries: Optional[list[UUID]] = Field(default=None)
+    Key: UUID = Field(default=None)
 
 
 class KeyValuePair_2OfString_OnBoardConnectedParticipant(Schema):
@@ -1399,8 +1399,8 @@ class LanguageItem(Schema):
 
 
 class LastCdrAndChatMessageTimestamp(Schema):
-    LastCdrStartedAt: str = Field(default=None)
-    LastChatMessageTimeSent: str = Field(default=None)
+    LastCdrStartedAt: datetime = Field(default=None)
+    LastChatMessageTimeSent: datetime = Field(default=None)
 
 
 class LastCdrAndChatMessageTimestampCollectionResponse(BaseCollectionPaginationCountResponse):
@@ -1422,10 +1422,10 @@ class LicenseStatus(Schema):
     CountryCode: Optional[str] = Field(default=None)
     CountryName: Optional[str] = Field(default=None)
     EMail: Optional[str] = Field(default=None)
-    ExpirationDate: Optional[str] = Field(default=None)
+    ExpirationDate: Optional[datetime] = Field(default=None)
     LicenseActive: Optional[bool] = Field(default=None)
     LicenseKey: str = Field(default=None)
-    MaintenanceExpiresAt: Optional[str] = Field(default=None)
+    MaintenanceExpiresAt: Optional[datetime] = Field(default=None)
     MaxSimCalls: Optional[int] = Field(default=None)
     ProductCode: Optional[str] = Field(default=None)
     ResellerName: Optional[str] = Field(default=None)
@@ -1494,7 +1494,7 @@ class BackupRepositorySettings(Schema):
 
 class LogEntry(Schema):
     Text: str = Field(default=None)
-    TimeStamp: str = Field(default=None)
+    TimeStamp: datetime = Field(default=None)
 
 
 class LogEntryCollectionResponse(BaseCollectionPaginationCountResponse):
@@ -1520,7 +1520,7 @@ class MCURequestStatus(Schema):
     ErrorMessage: Optional[str] = Field(default=None)
     McuId: Optional[str] = Field(default=None)
     Operation: McuOperation = Field(default=None)
-    RequestExpiration: Optional[str] = Field(default=None)
+    RequestExpiration: Optional[datetime] = Field(default=None)
     State: McuReqState = Field(default=None)
 
 
@@ -1722,7 +1722,7 @@ class OnBoardMcuData(Schema):
     NetOut: int = Field(default=None)
     RestartTime: str = Field(default=None)
     StartTime: str = Field(default=None)
-    Ts: str = Field(default=None)
+    Ts: datetime = Field(default=None)
     UpdateInterval: int = Field(default=None)
 
 
@@ -1746,15 +1746,15 @@ class OnBoardMcuRow(Schema):
     Secret: str = Field(default=None)
     ServerOS: OnBoardMcuServerOS = Field(default=None)
     ServerStatus: int = Field(default=None)
-    TsActivated: str = Field(default=None)
-    TsCreated: str = Field(default=None)
+    TsActivated: datetime = Field(default=None)
+    TsCreated: datetime = Field(default=None)
     Version: str = Field(default=None)
     Zone: str = Field(default=None)
 
 
 class OutboundCall(Schema):
     Answered: bool = Field(default=None)
-    CallCost: Optional[int] = Field(default=None)
+    CallCost: Optional[Decimal] = Field(default=None)
     CallDuration: str = Field(default=None)
     CallHistoryId: Optional[str] = Field(default=None)
     CdrId: str = Field(default=None)
@@ -1770,7 +1770,7 @@ class OutboundCall(Schema):
     SourceCallerId: Optional[str] = Field(default=None)
     SourceDisplayName: Optional[str] = Field(default=None)
     SourceDn: Optional[str] = Field(default=None)
-    StartTime: str = Field(default=None)
+    StartTime: datetime = Field(default=None)
     Status: Optional[str] = Field(default=None)
     Summary: Optional[str] = Field(default=None)
     TalkingDuration: str = Field(default=None)
@@ -1853,7 +1853,7 @@ class OnBoardMeeting(Schema):
     Profile: str = Field(default=None)
     Recorded: bool = Field(default=None)
     Sessionid: str = Field(default=None)
-    Start: str = Field(default=None)
+    Start: datetime = Field(default=None)
 
 
 class ParticipantDetailsCollectionResponse(BaseCollectionPaginationCountResponse):
@@ -2121,8 +2121,8 @@ class PropertyCollectionResponse(BaseCollectionPaginationCountResponse):
 
 class PurgeSettings(Schema):
     All: bool = Field(default=None)
-    Start: Optional[str] = Field(default=None)
-    Stop: Optional[str] = Field(default=None)
+    Start: Optional[datetime] = Field(default=None)
+    Stop: Optional[datetime] = Field(default=None)
 
 
 class QualityParty(Schema):
@@ -2196,8 +2196,8 @@ class QueueAgentsChatStatisticsTotalsCollectionResponse(BaseCollectionPagination
 
 
 class QueueAnsweredCallsByWaitTime(Schema):
-    AnsweredTime: str = Field(default=None)
-    CallTime: str = Field(default=None)
+    AnsweredTime: datetime = Field(default=None)
+    CallTime: datetime = Field(default=None)
     destination: str = Field(default=None, alias="Destination")
     Dn: str = Field(default=None)
     DnNumber: Optional[str] = Field(default=None)
@@ -2237,7 +2237,7 @@ class QueueChatPerformanceCollectionResponse(BaseCollectionPaginationCountRespon
 
 class QueueFailedCallbacks(Schema):
     CallbackNo: str = Field(default=None)
-    CallTime: str = Field(default=None)
+    CallTime: datetime = Field(default=None)
     Dn: str = Field(default=None)
     QueueDnNumber: Optional[str] = Field(default=None)
     RingTime: Optional[str] = Field(default=None)
@@ -2302,7 +2302,7 @@ class ReceptionistForwardCollectionResponse(BaseCollectionPaginationCountRespons
 class Recording(Schema):
     ArchivedUrl: Optional[str] = Field(default=None)
     CallType: RecordingCallType = Field(default=None)
-    EndTime: Optional[str] = Field(default=None)
+    EndTime: Optional[datetime] = Field(default=None)
     FromCallerNumber: Optional[str] = Field(default=None)
     FromCrmContact: Optional[str] = Field(default=None)
     FromDidNumber: Optional[str] = Field(default=None)
@@ -2315,7 +2315,7 @@ class Recording(Schema):
     RecordingUrl: Optional[str] = Field(default=None)
     RefParticipantId: Optional[int] = Field(default=None)
     SentimentScore: Optional[int] = Field(default=None)
-    StartTime: Optional[str] = Field(default=None)
+    StartTime: Optional[datetime] = Field(default=None)
     Summary: Optional[str] = Field(default=None)
     ToCallerNumber: Optional[str] = Field(default=None)
     ToCrmContact: Optional[str] = Field(default=None)
@@ -2351,19 +2351,19 @@ class ReferenceUpdate(Schema):
 
 
 class RefreshToken(Schema):
-    Created: str = Field(default=None)
+    Created: datetime = Field(default=None)
     CreatedByIp: str = Field(default=None)
     CreatedByUserAgent: str = Field(default=None)
     DisplayName: Optional[str] = Field(default=None)
-    Expires: str = Field(default=None)
+    Expires: datetime = Field(default=None)
     Id: int = Field(default=None)
     login_type: LoginType = Field(default=None, alias="LoginType")
     ReasonRevoked: RevokeReason = Field(default=None)
-    Revoked: Optional[str] = Field(default=None)
+    Revoked: Optional[datetime] = Field(default=None)
     RevokedByIp: Optional[str] = Field(default=None)
     SlidingExpiration: bool = Field(default=None)
     Token: str = Field(default=None)
-    Used: str = Field(default=None)
+    Used: datetime = Field(default=None)
     UsedByIp: str = Field(default=None)
     UsedByUserAgent: str = Field(default=None)
     Username: str = Field(default=None)
@@ -2790,7 +2790,7 @@ class SystemStatus(Schema):
     CurrentLocalIp: Optional[str] = Field(default=None)
     DBMaintenanceInProgress: Optional[bool] = Field(default=None)
     DiskUsage: Optional[int] = Field(default=None)
-    ExpirationDate: Optional[str] = Field(default=None)
+    ExpirationDate: Optional[datetime] = Field(default=None)
     ExtensionsRegistered: Optional[int] = Field(default=None)
     ExtensionsTotal: Optional[int] = Field(default=None)
     FQDN: Optional[str] = Field(default=None)
@@ -2804,14 +2804,14 @@ class SystemStatus(Schema):
     IsAuditLogEnabled: Optional[bool] = Field(default=None)
     IsChatLogEnabled: Optional[bool] = Field(default=None)
     IsRecordingArchiveEnabled: Optional[bool] = Field(default=None)
-    LastBackupDateTime: Optional[str] = Field(default=None)
-    LastCheckForUpdates: Optional[str] = Field(default=None)
-    LastSuccessfulUpdate: Optional[str] = Field(default=None)
+    LastBackupDateTime: Optional[datetime] = Field(default=None)
+    LastCheckForUpdates: Optional[datetime] = Field(default=None)
+    LastSuccessfulUpdate: Optional[datetime] = Field(default=None)
     LicenseActive: Optional[bool] = Field(default=None)
     LicenseKey: Optional[str] = Field(default=None)
     LocalIpValid: Optional[bool] = Field(default=None)
     LogUsedSpace: Optional[int] = Field(default=None)
-    MaintenanceExpiresAt: Optional[str] = Field(default=None)
+    MaintenanceExpiresAt: Optional[datetime] = Field(default=None)
     MaxSimCalls: Optional[int] = Field(default=None)
     OS: XOperatingSystemType = Field(default=None)
     OutboundRules: Optional[int] = Field(default=None)
@@ -2857,7 +2857,7 @@ class TestResult(Schema):
 
 
 class TimeReportData(Schema):
-    XValue: str = Field(default=None)
+    XValue: datetime = Field(default=None)
     YValue1: Optional[int] = Field(default=None)
     YValue2: Optional[int] = Field(default=None)
 
@@ -2959,7 +2959,7 @@ class UpdateItem(Schema):
     Category: str = Field(default=None)
     Description: str = Field(default=None)
     DescriptionLink: str = Field(default=None)
-    Guid: Optional[str] = Field(default=None)
+    Guid: Optional[UUID] = Field(default=None)
     Ignore: Optional[bool] = Field(default=None)
     Image: str = Field(default=None)
     LocalVersion: str = Field(default=None)
@@ -2976,8 +2976,8 @@ class UpdateItemCollectionResponse(BaseCollectionPaginationCountResponse):
 class UpdateList(Schema):
     Entries: Optional[list[UpdateItem]] = Field(default=None)
     IsMaintananceExpired: Optional[bool] = Field(default=None)
-    Key: Optional[str] = Field(default=None)
-    LastSuccessfulUpdate: Optional[str] = Field(default=None)
+    Key: Optional[UUID] = Field(default=None)
+    LastSuccessfulUpdate: Optional[datetime] = Field(default=None)
 
 
 class UpdateSettings(Schema):
@@ -2992,7 +2992,7 @@ class UpdatesStats(Schema):
 
 class UserActivity(Schema):
     AnsweredCount: int = Field(default=None)
-    DateTimeInterval: str = Field(default=None)
+    DateTimeInterval: datetime = Field(default=None)
     UnansweredCount: int = Field(default=None)
 
 
@@ -3067,14 +3067,14 @@ class Group(Schema):
     Id: int = Field(default=None)
     IsDefault: Optional[bool] = Field(default=None)
     Language: Optional[str] = Field(default=None)
-    LastLoginTime: Optional[str] = Field(default=None)
+    LastLoginTime: Optional[datetime] = Field(default=None)
     Members: Optional[list[UserGroup]] = Field(default=None)
     Name: Optional[str] = Field(default=None)
     Number: Optional[str] = Field(default=None)
     OfficeHolidays: Optional[list[Holiday]] = Field(default=None)
     OfficeRoute: Route = Field(default=None)
     OutOfOfficeRoute: Route = Field(default=None)
-    OverrideExpiresAt: Optional[str] = Field(default=None)
+    OverrideExpiresAt: Optional[datetime] = Field(default=None)
     OverrideHolidays: Optional[bool] = Field(default=None)
     prompt_set: Optional[str] = Field(default=None, alias="PromptSet")
     Props: GroupProps = Field(default=None)
@@ -3252,7 +3252,7 @@ class ServicePrincipal(Schema):
     CallControlEnabled: Optional[bool] = Field(default=None)
     Groups: Optional[list[UserGroup]] = Field(default=None)
     Id: int = Field(default=None)
-    LastUsed: Optional[str] = Field(default=None)
+    LastUsed: Optional[datetime] = Field(default=None)
     Number: Optional[str] = Field(default=None)
     Peers: Optional[list[Peer]] = Field(default=None)
     TranscriptionMode: TranscriptionType = Field(default=None)
@@ -3447,7 +3447,7 @@ class Trunk(Schema):
 
 
 class CallFlowApp(Schema):
-    CompilationLastSuccess: Optional[str] = Field(default=None)
+    CompilationLastSuccess: Optional[datetime] = Field(default=None)
     CompilationResult: Optional[str] = Field(default=None)
     CompilationSucceeded: Optional[bool] = Field(default=None)
     Groups: Optional[list[UserGroup]] = Field(default=None)
