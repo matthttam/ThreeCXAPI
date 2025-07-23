@@ -3,7 +3,10 @@ import inspect
 import re
 import keyword
 import builtins
-import threecxapi.components.schemas.pbx as pbx_module
+from typing import Union
+from collections import OrderedDict
+
+banned_names = set(keyword.kwlist) | set(dir(builtins)) | {"Optional", "Field", "Schema", "BaseModel"}
 
 
 def extract_enum_definitions(yaml_file_path: str) -> dict[str, list[str]]:
@@ -32,6 +35,9 @@ def extract_object_schemas(yaml_file_path: str) -> dict[str, dict]:
     for name, definition in schemas.items():
         if isinstance(definition, dict) and definition.get("type") == "object":
             clean_name = name.removeprefix("Pbx.")
+            # Skip any that contain a dot in the name as they don't belong in the Pbx namespace itself
+            if "." in clean_name:
+                continue
             object_definitions[clean_name] = definition
 
     return object_definitions
@@ -54,9 +60,19 @@ def to_snake_case(name: str) -> str:
 def map_openapi_type(schema: dict) -> str:
     type_ = schema.get("type")
     format_ = schema.get("format")
-    nullable = schema.get("nullable", False)
+    # nullable = schema.get("nullable", False)
+    allOf = schema.get("allOf", [])
+    if allOf:
+        # Handle 'allOf' by merging schemas
+        merged_schema = {}
+        for part in allOf:
+            if "$ref" in part:
+                schema["$ref"] = part["$ref"]
+                # merged_schema = pbx_module.__dict__.get(ref_name, {})
+            else:
+                merged_schema.update(part)
 
-    if "$ref" in schema:
+    elif "$ref" in schema:
         ref = schema["$ref"].split("/")[-1]
         result = ref.split(".")[-1]
     elif type_ == "string":
@@ -84,18 +100,19 @@ def map_openapi_type(schema: dict) -> str:
     else:
         result = "Any"
 
-    return f"Optional[{result}]" if nullable or type_ == "array" else result
+    # return f"Optional[{result}]" if nullable or type_ == "array" else result
+    return result
 
 
-def sort_missing_classes(missing: set[str], swagger_objects: dict) -> list[str]:
+def sort_swagger_objects(swagger_objects: dict) -> list[str]:
     def normalize_name(name: str) -> str:
         if name.startswith("Pbx."):
             return name[len("Pbx.") :]
         return name
 
-    sorted_list = []
+    ordered_dict = OrderedDict()
     seen = set()
-    remaining = set(missing)
+    keys_remaining = sorted(set(swagger_objects.keys()))
 
     def extract_refs(obj: dict) -> set[str]:
         refs = set()
@@ -119,155 +136,150 @@ def sort_missing_classes(missing: set[str], swagger_objects: dict) -> list[str]:
 
         return refs
 
-    while remaining:
+    while keys_remaining:
         progress = False
-        for name in sorted(remaining):  # Deterministic order
-            definition = swagger_objects.get(name, {})
+        for key in keys_remaining:  # Deterministic order
+            definition = swagger_objects.get(key, {})
             refs = extract_refs(definition)
 
-            unresolved_refs = {ref for ref in refs if ref in remaining}
+            unresolved_refs = {ref for ref in refs if ref in keys_remaining}
 
             if not unresolved_refs:
-                sorted_list.append(name)
-                seen.add(name)
-                remaining.remove(name)
+                ordered_dict[key] = definition
+                seen.add(key)
+                keys_remaining.remove(key)
                 progress = True
                 break  # Restart outer loop for stability
 
         if not progress:
             # No progress made — break potential cycles
-            for name in sorted(remaining):
-                sorted_list.append(name)
+            for key in keys_remaining:
+                ordered_dict[key] = definition
             break
 
-    return sorted_list
+    return ordered_dict
+
+
+import re
+
+
+def convert_ref_to_class_name(ref: str) -> str:
+    pattern = r".*[./]([^./]+)$"
+    match = re.search(pattern, ref)
+    if match:
+        return match.group(1)
+
+
+def parse_swagger_object_to_python(swagger_object_key, swagger_object: dict) -> str:
+    global banned_names
+    python_code = ""
+    properties = {}
+    banned_names.add(swagger_object_key)
+
+    # Handle 'allOf' at the top level of the object
+    all_of = swagger_object.get("allOf")
+    if all_of:
+        # Gather base classes from $ref
+        base_classes = []
+        for entry in all_of:
+            if "$ref" in entry:
+                ref = entry["$ref"]
+                base_classes.append(convert_ref_to_class_name(ref))
+            elif entry.get("type") == "object":
+                properties.update(entry.get("properties", {}))
+
+        bases = ", ".join(base_classes) if base_classes else "Schema"
+    else:
+        properties = swagger_object.get("properties", {})
+        bases = "Schema"
+
+    python_code += f"class {swagger_object_key}({bases}):"
+    if properties:
+        python_code += parse_swagger_object_property_to_python(properties)
+    else:
+        python_code += "    pass"
+    return python_code
+
+
+def parse_swagger_object_property_to_python(properties: dict) -> str:
+    python_code = ""
+
+    for prop_name, prop_schema in properties.items():
+        optional = prop_schema.get("nullable", False)
+        # Handle allOf at the property level
+        if "allOf" in prop_schema:
+            merged_schema = {}
+            for part in prop_schema["allOf"]:
+                if "$ref" in part:
+                    merged_schema = part  # Use ref directly
+                    break
+                elif "type" in part or "properties" in part:
+                    merged_schema.update(part)
+            prop_schema = merged_schema
+
+        if "oneOf" in prop_schema:
+            union_types = []
+            for variant in prop_schema["oneOf"]:
+                # For python if any of the options are nullable then the entire field is nullable.
+                if not optional:
+                    optional = variant.get("nullable", False)
+                type_str = map_openapi_type(variant)
+                union_types.append(type_str)
+
+            # Remove duplicates but preserve order
+            seen = set()
+            unique_union = []
+            for t in union_types:
+                if t not in seen:
+                    seen.add(t)
+                    unique_union.append(t)
+
+            type_hint = " | ".join(unique_union)
+            # type_hint = union_str if is_required else f"Optional[{union_str}]"
+
+        else:
+            type_hint = map_openapi_type(prop_schema)
+
+        if optional:
+            type_hint = f"Optional[{type_hint}]"
+        # Determine final property name and alias
+        if prop_name.startswith("@"):
+            final_name = prop_name.split(".")[-1]
+            alias_snippet = f', alias="{prop_name}"'
+        elif prop_name in banned_names:
+            final_name = to_snake_case(prop_name)
+            alias_snippet = f', alias="{prop_name}"'
+        # elif prop_name in swagger_enum_names or f"Pbx.{prop_name}" in swagger_object_names or prop_name in swagger_object_names:
+        #     final_name = to_snake_case(prop_name)
+        #     alias_snippet = f', alias="{prop_name}"' if final_name != prop_name else ""
+        else:
+            final_name = prop_name
+            alias_snippet = ""
+
+        if optional:
+            default_snippet = "default=None"
+        else:
+            default_snippet = "..."
+        python_code += f"\n    {final_name}: {type_hint} = Field({default_snippet}{alias_snippet})"
+
+    return python_code
 
 
 if __name__ == "__main__":
-    file_path = "./openapi/openapi_3.0.4.yml"
+    file_path = "./.openapi/openapi_3.0.4.yml"
     swagger_objects = extract_object_schemas(file_path)
     swagger_enums = extract_enum_definitions(file_path)
-    python_classes = get_schema_class_fields(pbx_module)
 
     swagger_object_names = set(swagger_objects.keys())
     swagger_enum_names = set(swagger_enums.keys())
-    python_class_names = set(python_classes.keys())
 
-    missing_in_python = swagger_object_names - python_class_names
-    extra_in_python = python_class_names - swagger_object_names
-    sorted_missing = sort_missing_classes(missing_in_python, swagger_objects)
+    banned_names.update(swagger_enum_names)
 
-    for name in sorted_missing:
-        definition = swagger_objects[name]
-        class_name = name.split(".")[-1]
+    sorted_swagger_objects = sort_swagger_objects(swagger_objects)
 
-        # Handle 'allOf' at the top level of the object
-        all_of = definition.get("allOf")
-        if all_of:
-            # Gather base classes from $ref
-            base_classes = []
-            props = {}
-            required = set()
-
-            for entry in all_of:
-                if "$ref" in entry:
-                    ref = entry["$ref"]
-                    ref_name = ref.split("/")[-1].split(".")[-1]
-                    base_classes.append(ref_name)
-                elif entry.get("type") == "object":
-                    props.update(entry.get("properties", {}))
-                    required.update(entry.get("required", []))
-
-            bases = ", ".join(base_classes) if base_classes else "BaseModel"
-        else:
-            props = definition.get("properties", {})
-            required = set(definition.get("required", []))
-            bases = "Schema"
-
-        print(f"\n\nclass {class_name}({bases}):")
-        if not props:
-            print("    pass")
-            continue
-
-        for prop_name, prop_schema in props.items():
-            # Handle allOf at the property level
-            if "allOf" in prop_schema:
-                merged_schema = {}
-                for part in prop_schema["allOf"]:
-                    if "$ref" in part:
-                        merged_schema = part  # Use ref directly
-                        break
-                    elif "type" in part or "properties" in part:
-                        merged_schema.update(part)
-                prop_schema = merged_schema
-
-            if "oneOf" in prop_schema:
-                union_types = []
-                for variant in prop_schema["oneOf"]:
-                    is_nullable = variant.get("nullable", False)
-                    type_str = map_openapi_type(variant)
-                    union_types.append(type_str)
-
-                # Remove duplicates but preserve order
-                seen = set()
-                unique_union = []
-                for t in union_types:
-                    if t not in seen:
-                        seen.add(t)
-                        unique_union.append(t)
-
-                type_hint = " | ".join(unique_union)
-                # type_hint = union_str if is_required else f"Optional[{union_str}]"
-
-            else:
-                type_hint = map_openapi_type(prop_schema)
-
-            is_required = prop_name in required
-
-            # Determine final property name and alias
-            banned_names = set(keyword.kwlist) | set(dir(builtins)) | {"Optional", "Field", "Schema", "BaseModel"}
-            if prop_name.startswith("@"):
-                final_name = prop_name.split(".")[-1]
-                alias_snippet = f', alias="{prop_name}"'
-            elif prop_name in banned_names:
-                final_name = to_snake_case(prop_name)
-                alias_snippet = f', alias="{prop_name}"'
-            elif prop_name in swagger_enum_names or f"Pbx.{prop_name}" in swagger_object_names or prop_name in swagger_object_names:
-                final_name = to_snake_case(prop_name)
-                alias_snippet = f', alias="{prop_name}"' if final_name != prop_name else ""
-            else:
-                final_name = prop_name
-                alias_snippet = ""
-
-            # Print the field
-            if type_hint.startswith("Optional[list"):
-                print(f"    {final_name}: {type_hint} = Field(default=None{alias_snippet})")
-            elif type_hint.startswith("Optional["):
-                print(f"    {final_name}: {type_hint} = Field(default=None{alias_snippet})")
-            elif is_required:
-                print(f"    {final_name}: {type_hint} = Field(...{alias_snippet})")
-            else:
-                print(f"    {final_name}: {type_hint} = Field(default=None{alias_snippet})")
-
-    # print("\n=== Extra in Python ===")
-    # for name in sorted(extra_in_python):
-    #    print(name)
-
-    # print("\n=== Differences in Properties ===")
-    # for obj_name in sorted(swagger_object_names & python_class_names):
-    #    swagger_props = set(swagger_objects[obj_name])
-    #    python_props = set(python_classes[obj_name])
-#
-#    missing_props = swagger_props - python_props
-#    extra_props = python_props - swagger_props
-#
-#    if missing_props or extra_props:
-#        print(f"\nIn object '{obj_name}':")
-#        if missing_props:
-#            print("  Missing properties:")
-#            for prop in sorted(missing_props):
-#                print(f"    {prop}")
-#        if extra_props:
-#            print("  Extra properties:")
-#            for prop in sorted(extra_props):
-#                print(f"    {prop}")
+    python_code = ""
+    for swagger_object_key, swagger_object in sorted_swagger_objects.items():
+        # if(swagger_object.get("type") == "object" and swagger_object_key not in swagger_enum_names):
+        python_code += parse_swagger_object_to_python(swagger_object_key, swagger_object)
+        python_code += f"\n\n\n"
+    print(python_code)
