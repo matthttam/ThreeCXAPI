@@ -5,9 +5,14 @@ This is a python wrapper for the 3CX API. It is designed to make it easier to in
 > :warning: Notice
 > This package is not affiliated with 3CX. It is an unofficial package that is designed to make it easier to interact with the 3CX API.
 
+## 3CX API Compatibility
+The 3CX API can change at any time. They do provide a swagger file. The following table works to show compatibility between this package and the 3CX and swagger reported versions.
+| Package Version | 3CX Version| OpenAPI Version |
+|-----------------|------------|-----------------|
+| 1.0.6           | Version 20.0 Update 6 + | 3.0.4 |
+| < 1.0.6         | < Version 20.0 Update 6 | 3.0.0 |
 
 ## Supported Endpoints
-
 Objects are created for almost every endpoint, response, exception, etc from the swagger provided by 3CX. The following endpoints are fully implemented into a resource that makes it easier to perform actions on them. Other endpoints can be accessed but must be done so manually with the `ThreeCXApiConnection` object.
 
 __Supported Endpoints:__
