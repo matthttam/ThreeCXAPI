@@ -1,6 +1,6 @@
 # Changelog
 ## [1.0.6](https://github.com/matthttam/ThreeCXAPI/releases/tag/1.0.6) - 2025-07-24
-[pypi package](https://pypi.org/project/threecxapi/1.0.6.post1/)
+[pypi package](https://pypi.org/project/threecxapi/1.0.6/)
 
 ### Changed
 - **Breaking:** Rewrite of pbx, enums, and response objects. Enums has moved under pbx.
