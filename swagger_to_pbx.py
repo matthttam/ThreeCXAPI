@@ -57,51 +57,50 @@ def to_snake_case(name: str) -> str:
     return name.lower()
 
 
-def map_openapi_type(schema: dict) -> str:
-    type_ = schema.get("type")
-    format_ = schema.get("format")
+def map_openapi_type(property_schema: dict) -> str:
+    openapi_type = property_schema.get("type")
+    openapi_format = property_schema.get("format")
     # nullable = schema.get("nullable", False)
-    allOf = schema.get("allOf", [])
+    allOf = property_schema.get("allOf", [])
     if allOf:
         # Handle 'allOf' by merging schemas
         merged_schema = {}
         for part in allOf:
             if "$ref" in part:
-                schema["$ref"] = part["$ref"]
-                # merged_schema = pbx_module.__dict__.get(ref_name, {})
+                property_schema["$ref"] = part["$ref"]
             else:
                 merged_schema.update(part)
 
-    elif "$ref" in schema:
-        ref = schema["$ref"].split("/")[-1]
-        result = ref.split(".")[-1]
-    elif type_ == "string":
-        if format_ == "uuid":
-            result = "UUID"
-        elif format_ == "date-time":
-            result = "datetime"
+    elif "$ref" in property_schema:
+        ref = property_schema["$ref"].split("/")[-1]
+        python_type = ref.split(".")[-1]
+    elif openapi_type == "string":
+        if openapi_format == "uuid":
+            python_type = "UUID"
+        elif openapi_format == "date-time":
+            python_type = "datetime"
         else:
-            result = "str"
-    elif type_ == "integer":
-        if format_ == "decimal":
-            result = "Decimal"
+            python_type = "str"
+    elif openapi_type == "integer":
+        if openapi_format == "decimal":
+            python_type = "Decimal"
         else:
-            result = "int"
-    elif type_ == "number":
-        result = "float"
-    elif type_ == "boolean":
-        result = "bool"
-    elif type_ == "array":
-        items = schema.get("items", {})
+            python_type = "int"
+    elif openapi_type == "number":
+        python_type = "float"
+    elif openapi_type == "boolean":
+        python_type = "bool"
+    elif openapi_type == "array":
+        items = property_schema.get("items", {})
         inner_type = map_openapi_type(items)
-        result = f"list[{inner_type}]"
-    elif type_ == "object":
-        result = "dict"
+        python_type = f"list[{inner_type}]"
+    elif openapi_type == "object":
+        python_type = "dict"
     else:
-        result = "Any"
+        python_type = "Any"
 
     # return f"Optional[{result}]" if nullable or type_ == "array" else result
-    return result
+    return python_type
 
 
 def sort_swagger_objects(swagger_objects: dict) -> list[str]:
@@ -160,9 +159,6 @@ def sort_swagger_objects(swagger_objects: dict) -> list[str]:
     return ordered_dict
 
 
-import re
-
-
 def convert_ref_to_class_name(ref: str) -> str:
     pattern = r".*[./]([^./]+)$"
     match = re.search(pattern, ref)
@@ -204,22 +200,22 @@ def parse_swagger_object_to_python(swagger_object_key, swagger_object: dict) -> 
 def parse_swagger_object_property_to_python(properties: dict) -> str:
     python_code = ""
 
-    for prop_name, prop_schema in properties.items():
-        optional = prop_schema.get("nullable", False)
+    for property_name, property_schema in properties.items():
+        optional = property_schema.get("nullable", False)
         # Handle allOf at the property level
-        if "allOf" in prop_schema:
+        if "allOf" in property_schema:
             merged_schema = {}
-            for part in prop_schema["allOf"]:
+            for part in property_schema["allOf"]:
                 if "$ref" in part:
                     merged_schema = part  # Use ref directly
                     break
                 elif "type" in part or "properties" in part:
                     merged_schema.update(part)
-            prop_schema = merged_schema
+            property_schema = merged_schema
 
-        if "oneOf" in prop_schema:
+        if "oneOf" in property_schema:
             union_types = []
-            for variant in prop_schema["oneOf"]:
+            for variant in property_schema["oneOf"]:
                 # For python if any of the options are nullable then the entire field is nullable.
                 if not optional:
                     optional = variant.get("nullable", False)
@@ -235,29 +231,27 @@ def parse_swagger_object_property_to_python(properties: dict) -> str:
                     unique_union.append(t)
 
             type_hint = " | ".join(unique_union)
-            # type_hint = union_str if is_required else f"Optional[{union_str}]"
 
         else:
-            type_hint = map_openapi_type(prop_schema)
+            type_hint = map_openapi_type(property_schema)
 
         if optional:
             type_hint = f"Optional[{type_hint}]"
         # Determine final property name and alias
-        if prop_name.startswith("@"):
-            final_name = prop_name.split(".")[-1]
-            alias_snippet = f', alias="{prop_name}"'
-        elif prop_name in banned_names:
-            final_name = to_snake_case(prop_name)
-            alias_snippet = f', alias="{prop_name}"'
-        # elif prop_name in swagger_enum_names or f"Pbx.{prop_name}" in swagger_object_names or prop_name in swagger_object_names:
-        #     final_name = to_snake_case(prop_name)
-        #     alias_snippet = f', alias="{prop_name}"' if final_name != prop_name else ""
+        if property_name.startswith("@"):
+            final_name = property_name.split(".")[-1]
+            alias_snippet = f', alias="{property_name}"'
+        elif property_name in banned_names:
+            final_name = to_snake_case(property_name)
+            alias_snippet = f', alias="{property_name}"'
         else:
-            final_name = prop_name
+            final_name = property_name
             alias_snippet = ""
 
         if optional:
             default_snippet = "default=None"
+        elif property_schema.get("type"):
+            default_snippet = "default_factory=list"
         else:
             default_snippet = "..."
         python_code += f"\n    {final_name}: {type_hint} = Field({default_snippet}{alias_snippet})"
@@ -279,7 +273,6 @@ if __name__ == "__main__":
 
     python_code = ""
     for swagger_object_key, swagger_object in sorted_swagger_objects.items():
-        # if(swagger_object.get("type") == "object" and swagger_object_key not in swagger_enum_names):
         python_code += parse_swagger_object_to_python(swagger_object_key, swagger_object)
         python_code += f"\n\n\n"
     print(python_code)
