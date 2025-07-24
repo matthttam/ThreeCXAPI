@@ -1,6 +1,5 @@
-from typing import Optional
 from typing import Any
-from threecxapi.components.schemas.pbx import Schema
+from threecxapi.components.schema import Schema
 from pydantic import Field
 
 

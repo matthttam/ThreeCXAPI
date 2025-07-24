@@ -1,118 +1,6 @@
 from threecxapi.components.response import Response
 from pydantic import Field
-from threecxapi.components.schemas.pbx import (
-    Receptionist,
-    BlackListNumber,
-    BlocklistAddr,
-    RingGroup,
-    Contact,
-    Queue,
-    User,
-    PhoneTemplate,
-    TrunkTemplate,
-    Recording,
-    Group,
-    OutboundRule,
-    Parameter,
-    DNProperty,
-    Peer,
-    Trunk,
-    InboundRule,
-    Country,
-    Fxs,
-    PromptSet,
-    CustomPrompt,
-    Property,
-    FxsTemplate,
-    Weblink,
-    Parking,
-    Backups,
-    Sbc,
-    CallHistoryView,
-    ChatHistoryView,
-    ChatMessagesHistoryView,
-    RingGroupStatistics,
-    ExtensionsStatisticsByRingGroups,
-    CallLogData,
-    RegistrarFxs,
-    ExtensionStatistics,
-    ReportExtensionStatisticsByGroup,
-    CallCostByExtensionGroup,
-    QueuePerformanceOverview,
-    QueuePerformanceTotals,
-    TeamQueueGeneralStatistics,
-    DetailedQueueStatistics,
-    AbandonedQueueCalls,
-    QueueAnsweredCallsByWaitTime,
-    QueueCallbacks,
-    AgentsInQueueStatistics,
-    QueueFailedCallbacks,
-    StatisticSla,
-    BreachesSla,
-    CallFlowApp,
-    QueueChatPerformance,
-    QueueAgentsChatStatistics,
-    QueueAgentsChatStatisticsTotals,
-    AbandonedChatsStatistics,
-    AgentLoginHistory,
-    AuditLog,
-    InboundRuleReport,
-    CrmTemplate,
-    CallCostSettings,
-    PhoneLogo,
-    TimeReportData,
-    ReportGroup,
-    EventLog,
-    ServiceInfo,
-    EmailTemplate,
-    Playlist,
-    Fax,
-    DeviceInfo,
-    SipDevice,
-    NetworkInterface,
-    ReceptionistForward,
-    UserGroup,
-    RingGroupMember,
-    QueueAgent,
-    QueueManager,
-    Greeting,
-    ForwardingProfile,
-    ExtensionRule,
-    Phone,
-    Rights,
-    Holiday,
-    PeerGroup,
-    Prompt,
-    Codec,
-    GatewayParameter,
-    TimeZone,
-    GatewayParameterValue,
-    CrmSelectableValue,
-    PhoneModel,
-    OutboundRoute,
-    DNRange,
-    CIDFormatting,
-    SetRoute,
-    KeyValuePair_2OfString_String,
-    DeviceLine,
-    Variable,
-    FxsModel,
-    FxsVariable,
-    UpdateItem,
-    CategoryUpdate,
-    CrmParameter,
-    CDRSettingsField,
-    Microsoft365User,
-    GatewayParameterBinding,
-    Choice,
-    PhoneDeviceVlanInfo,
-    CustomQueueRingtone,
-    CrmChoice,
-    CrmContact,
-    Period,
-    TrunkVariable,
-    FxsVariableChoice,
-)
+from threecxapi.components.schemas.pbx import *
 
 
 class ReceptionistCollectionResponse(Response):
@@ -355,10 +243,6 @@ class TimeReportDataCollectionResponse(Response):
     value: list[TimeReportData] = Field(default_factory=list)
 
 
-class ReportGroupCollectionResponse(Response):
-    value: list[ReportGroup] = Field(default_factory=list)
-
-
 class EventLogCollectionResponse(Response):
     value: list[EventLog] = Field(default_factory=list)
 
@@ -483,10 +367,6 @@ class SetRouteCollectionResponse(Response):
     value: list[SetRoute] = Field(default_factory=list)
 
 
-class KeyValuePair_2OfString_StringCollectionResponse(Response):
-    value: list[KeyValuePair_2OfString_String] = Field(default_factory=list)
-
-
 class DeviceLineCollectionResponse(Response):
     value: list[DeviceLine] = Field(default_factory=list)
 
@@ -517,10 +397,6 @@ class CrmParameterCollectionResponse(Response):
 
 class CDRSettingsFieldCollectionResponse(Response):
     value: list[CDRSettingsField] = Field(default_factory=list)
-
-
-class Microsoft365UserCollectionResponse(Response):
-    value: list[Microsoft365User] = Field(default_factory=list)
 
 
 class GatewayParameterBindingCollectionResponse(Response):

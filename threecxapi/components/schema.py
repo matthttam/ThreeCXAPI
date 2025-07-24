@@ -1,14 +1,27 @@
 from typing import Any
 from enum import auto
 from functools import lru_cache
-
-from pydantic import BaseModel, ConfigDict
-
+from pydantic import BaseModel, PrivateAttr
 from threecxapi.util import TcxStrEnum
 
 
 class Schema(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, use_enum_values=True)
+    # Private field to track validation warnings
+    _warnings: list[str] = PrivateAttr(default_factory=list)
+
+    def add_warning(self, msg: str):
+        self._warnings.append(msg)
+
+    @property
+    def warnings(self) -> list[str]:
+        return self._warnings.copy()
+
+    def model_post_init(self, __context: Any) -> None:
+        for field_name, value in self.__dict__.items():
+            if isinstance(value, TcxStrEnum) and not value.is_valid:
+                self.add_warning(
+                    f"Field '{field_name}' has unknown value '{value}', which is not a defined member of {type(value).__name__}."
+                )
 
     def model_dump(self, **kwargs) -> dict[str, Any]:
         # Set default options for model_dump
@@ -29,6 +42,4 @@ class Schema(BaseModel):
     def to_enum(cls) -> TcxStrEnum:
         """Creates an Enum based on the fields of the Schema class."""
         # Create a new TcxStrEnum
-        return TcxStrEnum(
-            cls.__name__ + "Properties", {field_name: auto() for field_name in cls.__annotations__.keys()}
-        )
+        return TcxStrEnum(cls.__name__ + "Properties", {field_name: auto() for field_name in cls.__annotations__.keys()})

@@ -8,10 +8,9 @@ authors = [{ name = "Matt Henry", email = "matthttam@gmail.com" }]
 description = "This is a python wrapper for the 3CX API. It is designed to make it easier to interact with the 3CX API. It is a work in progress and is not yet feature complete. It is designed to be used with the official 3CX v20 API."
 readme = "README.md"
 requires-python = ">=3.12"
-license = { file = "LICENSE" }
+license = "GPL-3.0-or-later"
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python :: 3"
 ]
 dynamic = ["version"]
 
